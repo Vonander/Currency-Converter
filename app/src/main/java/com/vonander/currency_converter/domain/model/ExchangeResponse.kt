@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class ExchangeRateResonse(
+data class ExchangeResponse(
     var success: Boolean,
     var terms: String,
     var privacy: String,

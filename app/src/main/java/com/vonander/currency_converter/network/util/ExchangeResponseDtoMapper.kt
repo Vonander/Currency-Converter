@@ -1,12 +1,12 @@
 package com.vonander.currency_converter.network.util
 
-import com.vonander.currency_converter.domain.model.ExchangeRateResonse
+import com.vonander.currency_converter.domain.model.ExchangeResponse
 import com.vonander.currency_converter.domain.util.DomainMapper
-import com.vonander.currency_converter.network.model.ExchangeRateResponseDto
+import com.vonander.currency_converter.network.model.ExchangeResponseDto
 
-class ExchangeRateResponseDtoMapper : DomainMapper<ExchangeRateResponseDto, ExchangeRateResonse> {
-    override fun mapToDomainModel(model: ExchangeRateResponseDto): ExchangeRateResonse {
-        return ExchangeRateResonse(
+class ExchangeResponseDtoMapper : DomainMapper<ExchangeResponseDto, ExchangeResponse> {
+    override fun mapToDomainModel(model: ExchangeResponseDto): ExchangeResponse {
+        return ExchangeResponse(
             success = model.success,
             terms = model.terms,
             privacy = model.privacy,
@@ -16,8 +16,8 @@ class ExchangeRateResponseDtoMapper : DomainMapper<ExchangeRateResponseDto, Exch
         )
     }
 
-    override fun mapFromDomainModel(domainModel: ExchangeRateResonse): ExchangeRateResponseDto {
-        return ExchangeRateResponseDto(
+    override fun mapFromDomainModel(domainModel: ExchangeResponse): ExchangeResponseDto {
+        return ExchangeResponseDto(
             success = domainModel.success,
             terms = domainModel.terms,
             privacy = domainModel.privacy,
@@ -27,11 +27,11 @@ class ExchangeRateResponseDtoMapper : DomainMapper<ExchangeRateResponseDto, Exch
         )
     }
 
-    fun toDomainList(initial: List<ExchangeRateResponseDto>): List<ExchangeRateResonse> {
+    fun toDomainList(initial: List<ExchangeResponseDto>): List<ExchangeResponse> {
         return initial.map { mapToDomainModel(it)}
     }
 
-    fun fromDomainList(initial: List<ExchangeRateResonse>): List<ExchangeRateResponseDto> {
+    fun fromDomainList(initial: List<ExchangeResponse>): List<ExchangeResponseDto> {
         return initial.map { mapFromDomainModel(it) }
     }
 }
