@@ -3,10 +3,12 @@ package com.vonander.currency_converter.presentation
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vonander.currency_converter.domain.model.ExchangeResponse
 import com.vonander.currency_converter.interactors.SearchExchange
+import com.vonander.currency_converter.util.STATE_KEY_QUERY
 import com.vonander.currency_converter.util.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -16,13 +18,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(
-    private val searchExchange: SearchExchange
+    private val searchExchange: SearchExchange,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     val loading = mutableStateOf(false)
+    val exchangeFromLabel = mutableStateOf("USD")
+    val exchangeToLabel = mutableStateOf("XXX")
     val currencies = mutableStateOf("USD,AUD,CAD,PLN,MXN")
     var quotesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
+    val searchBarQueryText = mutableStateOf("")
+    val searchBarResultText = mutableStateOf("19.90504")
     val errorMessage = mutableStateOf("")
+    val snackbarMessage = mutableStateOf("")
 
     init {
 
@@ -76,5 +84,14 @@ class ExchangeViewModel @Inject constructor(
         }
 
         quotesList.value = newList
+    }
+
+    fun onQueryChanged(query: String) {
+        setQuery(query = query)
+    }
+
+    private fun setQuery(query: String) {
+        this.searchBarQueryText.value = query
+        savedStateHandle.set(STATE_KEY_QUERY, query)
     }
 }
