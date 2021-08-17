@@ -6,18 +6,9 @@ data class ExchangeResponseDto(
     @SerializedName("success")
     var success: Boolean,
 
-    @SerializedName("terms")
-    var terms: String,
-
-    @SerializedName("privacy")
-    var privacy: String,
-
-    @SerializedName("timeStamp")
-    var timeStamp: Int,
-
     @SerializedName("source")
-    var source: String,
+    var source:  String,
 
     @SerializedName("quotes")
-    var quotes: HashMap<String, Float>,
+    var quotes: HashMap<String, Double>,
 )

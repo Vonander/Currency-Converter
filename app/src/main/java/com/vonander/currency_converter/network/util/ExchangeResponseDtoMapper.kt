@@ -8,9 +8,6 @@ class ExchangeResponseDtoMapper : DomainMapper<ExchangeResponseDto, ExchangeResp
     override fun mapToDomainModel(model: ExchangeResponseDto): ExchangeResponse {
         return ExchangeResponse(
             success = model.success,
-            terms = model.terms,
-            privacy = model.privacy,
-            timeStamp = model.timeStamp,
             source = model.source,
             quotes = model.quotes
         )
@@ -19,9 +16,6 @@ class ExchangeResponseDtoMapper : DomainMapper<ExchangeResponseDto, ExchangeResp
     override fun mapFromDomainModel(domainModel: ExchangeResponse): ExchangeResponseDto {
         return ExchangeResponseDto(
             success = domainModel.success,
-            terms = domainModel.terms,
-            privacy = domainModel.privacy,
-            timeStamp = domainModel.timeStamp,
             source = domainModel.source,
             quotes = domainModel.quotes
         )

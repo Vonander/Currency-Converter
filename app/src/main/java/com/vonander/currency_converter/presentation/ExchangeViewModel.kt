@@ -20,12 +20,12 @@ class ExchangeViewModel @Inject constructor(
 ) : ViewModel() {
 
     val loading = mutableStateOf(false)
-    val currencies = mutableStateOf("")
-    val quotesList: MutableState<List<HashMap<String, Float>>> = mutableStateOf(listOf())
+    val currencies = mutableStateOf("USD,AUD,CAD,PLN,MXN")
+    var quotesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
     val errorMessage = mutableStateOf("")
 
     init {
-        println("okej ExchangeViewModel init!")
+
     }
 
     fun onTriggerEvent(event: ExchangeUseCaseEvent) {
@@ -55,8 +55,6 @@ class ExchangeViewModel @Inject constructor(
 
             dataState.data?.let { response ->
                 appendQuotes(response)
-
-                println("okej newSearch -> quotesList: $quotesList")
             }
 
             dataState.error?.let { error ->
@@ -69,13 +67,14 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun appendQuotes(response: ExchangeResponse) {
-        val currentList = ArrayList(this.quotesList.value)
+        val newList = mutableListOf<HashMap<String, Double>>()
 
         response.quotes.forEach {
-            val newEntry = HashMap<String, Float>()
-            newEntry.put(it.key, it.value)
-            currentList.add(newEntry)
+            val newEntry = HashMap<String, Double>()
+            newEntry[it.key] = it.value
+            newList.add(newEntry)
         }
-    }
 
+        quotesList.value = newList
+    }
 }
