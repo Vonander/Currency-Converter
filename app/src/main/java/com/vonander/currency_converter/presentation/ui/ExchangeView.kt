@@ -1,9 +1,6 @@
 package com.vonander.currency_converter.presentation.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -15,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.vonander.currency_converter.presentation.ExchangeViewModel
+import com.vonander.currency_converter.presentation.components.DropDownMenu
 import com.vonander.currency_converter.presentation.components.SearchBar
 import com.vonander.currency_converter.ui.theme.CurrencyConverterTheme
 
@@ -28,20 +26,25 @@ fun ExchangeView(
     val snackbarMessage = viewModel.snackbarMessage.value
     val scaffoldState = rememberScaffoldState()
 
+    val items = listOf(
+        "English",
+        "Russian",
+        "Spanish",
+        "French",
+        "German",
+        "Swedish"
+    )
+
     CurrencyConverterTheme {
 
         Scaffold(
             topBar = {
-
                 SearchBar(
                     query = viewModel.searchBarQueryText.value,
                     result = viewModel.searchBarResultText.value,
-                    onQueryChanged = {
-                        println("okej $it")
-                        viewModel.onQueryChanged( query = it)
-                    },
-                    onExecuteSearch = { println("okej search!")},
-                    exchangeFromLabel = viewModel.exchangeFromLabel.value,
+                    onQueryChanged = { viewModel.onQueryChanged( query = it) },
+                    onExecuteSearch = { println("okej ExchangeView - > search!")},
+                    exchangeFromLabel = items[viewModel.dropDownMenu1SelectedIndex.value],
                     exchangeToLabel = viewModel.exchangeToLabel.value
                 )
             },
@@ -55,16 +58,53 @@ fun ExchangeView(
                 modifier = Modifier.fillMaxSize()
             ) {
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                Row(
                     modifier = Modifier.padding(top = 10.dp)
                 ) {
 
-                    Text(
-                        text = "testing testing $viewModel",
-                        color = MaterialTheme.colors.primary,
-                        textAlign = TextAlign.Center,
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier.fillMaxWidth(0.5f)
+                    ) {
+
+                        DropDownMenu(
+                            expanded = viewModel.dropDownMenu1Expanded.value,
+                            selectedIndex = viewModel.dropDownMenu1SelectedIndex.value,
+                            items = items,
+                            onSelect = {
+                                viewModel.dropDownMenu1SelectedIndex.value = it
+                                viewModel.dropDownMenu1Expanded.value = false
+                            },
+                            onDismissRequest = {
+                                viewModel.dropDownMenu1Expanded.value = false
+                            },
+                            onButtonClick = {
+                                viewModel.dropDownMenu1Expanded.value = true
+                            }
+                        )
+
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.Start
+                    ) {
+
+                        DropDownMenu(
+                            expanded = viewModel.dropDownMenu1Expanded.value,
+                            selectedIndex = viewModel.dropDownMenu1SelectedIndex.value,
+                            items = items,
+                            onSelect = {
+                                viewModel.dropDownMenu1SelectedIndex.value = it
+                                viewModel.dropDownMenu1Expanded.value = false
+                            },
+                            onDismissRequest = {
+                                viewModel.dropDownMenu1Expanded.value = false
+                            },
+                            onButtonClick = {
+                                viewModel.dropDownMenu1Expanded.value = true
+                            }
+                        )
+                    }
                 }
             }
         }

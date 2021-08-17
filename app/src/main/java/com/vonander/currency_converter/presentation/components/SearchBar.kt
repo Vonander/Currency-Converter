@@ -1,9 +1,6 @@
 package com.vonander.currency_converter.presentation.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -41,12 +38,15 @@ fun SearchBar(
                 horizontalArrangement = Arrangement.Center
             ) {
                 TextField(
-                    modifier = Modifier.fillMaxWidth(0.5f),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .padding(top = 10.dp)
+                    ,
                     value = query,
                     onValueChange = { onQueryChanged(it) },
                     label = { Text( text = exchangeFromLabel) },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
+                        keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Search
                     ),
                     leadingIcon = {
@@ -57,12 +57,6 @@ fun SearchBar(
                     },
                     keyboardActions = KeyboardActions(
                         onSearch = {
-                            println("okej search!")
-                            onExecuteSearch()
-                            focusManager.clearFocus(force = true)
-                        },
-                        onDone = {
-                            println("okej done!")
                             onExecuteSearch()
                             focusManager.clearFocus(force = true)
                         }
@@ -74,6 +68,7 @@ fun SearchBar(
                 )
 
                 TextField(
+                    modifier = Modifier.padding(top = 10.dp),
                     value = result,
                     onValueChange = {},
                     enabled = false,

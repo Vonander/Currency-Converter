@@ -27,14 +27,14 @@ class ExchangeViewModel @Inject constructor(
     val exchangeToLabel = mutableStateOf("XXX")
     val currencies = mutableStateOf("USD,AUD,CAD,PLN,MXN")
     var quotesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
-    val searchBarQueryText = mutableStateOf("")
+    val searchBarQueryText = mutableStateOf("1")
     val searchBarResultText = mutableStateOf("19.90504")
     val errorMessage = mutableStateOf("")
     val snackbarMessage = mutableStateOf("")
-
-    init {
-
-    }
+    val dropDownMenu1Expanded = mutableStateOf(false)
+    val dropDownMenu1SelectedIndex = mutableStateOf(0)
+    val dropDownMenu2Expanded = mutableStateOf(false)
+    val dropDownMenu2SelectedIndex = mutableStateOf(0)
 
     fun onTriggerEvent(event: ExchangeUseCaseEvent) {
         viewModelScope.launch {
