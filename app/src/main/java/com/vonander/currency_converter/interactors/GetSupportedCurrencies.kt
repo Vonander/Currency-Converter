@@ -14,7 +14,6 @@ class GetSupportedCurrencies(
 ) {
 
     fun execute(): Flow<DataState<ExchangeListResponse>> = flow {
-
         try {
 
             emit(DataState.loading())
@@ -24,7 +23,7 @@ class GetSupportedCurrencies(
             emit(DataState.success(response))
 
         } catch (e: Exception) {
-            emit(DataState.error<ExchangeListResponse>(e.message ?: "Unknown Error"))
+            emit(DataState.error<ExchangeListResponse>(e.message ?: "Unknown get supported currencies Error"))
         }
     }
 

@@ -3,14 +3,13 @@ package com.vonander.currency_converter.presentation
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vonander.currency_converter.domain.model.ExchangeListResponse
 import com.vonander.currency_converter.domain.model.ExchangeLiveResponse
+import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
 import com.vonander.currency_converter.interactors.SearchLiveRates
-import com.vonander.currency_converter.util.STATE_KEY_QUERY
 import com.vonander.currency_converter.util.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -22,17 +21,18 @@ import javax.inject.Inject
 class ExchangeViewModel @Inject constructor(
     private val getSupportedCurrencies: GetSupportedCurrencies,
     private val searchLiveRates: SearchLiveRates,
-    private val savedStateHandle: SavedStateHandle
+    private val getCurrencyConversion: GetCurrencyConversion
 ) : ViewModel() {
 
     val loading = mutableStateOf(false)
-    val exchangeFromLabel = mutableStateOf("USD")
-    val exchangeToLabel = mutableStateOf("USD")
-    val source = mutableStateOf("USD")
+    val exchangeFromCurrency = mutableStateOf("")
+    val exchangeToCurrency = mutableStateOf("")
+    val source = mutableStateOf("")
     val ratesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
-    val supportedCurrenciesList: MutableState<List<String>> = mutableStateOf(listOf("USD"))
+    val supportedCurrenciesMap = mutableStateOf(HashMap<String, String>())
+    val supportedCurrenciesList: MutableState<List<String>> = mutableStateOf(listOf(""))
     val searchBarQueryText = mutableStateOf("1")
-    val searchBarResultText = mutableStateOf("1")
+    val searchBarResultText = mutableStateOf("=")
     val errorMessage = mutableStateOf("")
     val snackbarMessage = mutableStateOf("")
     val dropDownMenu1Expanded = mutableStateOf(false)
@@ -41,8 +41,7 @@ class ExchangeViewModel @Inject constructor(
     val dropDownMenu2SelectedIndex = mutableStateOf(0)
 
     init {
-        newCurrenciesSearch()
-        //newRatesSearch()
+        getSupportedCurrencies()
     }
 
     fun onTriggerEvent(event: ExchangeUseCaseEvent) {
@@ -51,28 +50,31 @@ class ExchangeViewModel @Inject constructor(
 
                 when(event) {
                     is ExchangeUseCaseEvent.GetSupportedCurrenciesEvent -> {
-                        newCurrenciesSearch()
+                        getSupportedCurrencies()
                     }
 
                     is ExchangeUseCaseEvent.SearchRatesEvent -> {
                         newRatesSearch()
+                    }
+
+                    is ExchangeUseCaseEvent.GetCurrencyConversion -> {
+                        getCurrencyConversion()
                     }
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG,"onTriggerEvent: $event Exception: $e, ${e.cause}")
             }
-
         }
     }
 
-    private fun newCurrenciesSearch() {
+    private fun getSupportedCurrencies() {
         getSupportedCurrencies.execute().onEach { dataState ->
 
             loading.value = dataState.loading
 
             dataState.data?.let { response ->
-                appendSupportedCurrenciesToList(response = response)
+                appendSupportedCurrencies(response = response)
             }
 
             dataState.error?.let { error ->
@@ -83,7 +85,6 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun newRatesSearch() {
-
         searchLiveRates.execute(
             source = source.value
         ).onEach { dataState ->
@@ -100,10 +101,49 @@ class ExchangeViewModel @Inject constructor(
             }
 
         }.launchIn(viewModelScope)
-
     }
 
-    private fun appendSupportedCurrenciesToList(response: ExchangeListResponse) {
+    private fun getCurrencyConversion() {
+        val amount: Double
+
+        if (exchangeFromCurrency.value.isBlank() || exchangeToCurrency.value.isBlank()) {
+            errorMessage.value = "Currencies are not set"
+
+            return
+        }
+
+        try {
+            amount = searchBarQueryText.value.toDouble()
+
+            getCurrencyConversion.execute(
+                from = exchangeFromCurrency.value,
+                to = exchangeToCurrency.value,
+                amount = amount
+            ).onEach { dataState ->
+
+                loading.value = dataState.loading
+
+                dataState.data?.let { response ->
+                    searchBarResultText.value = "= ${response.result}"
+                }
+
+                dataState.error?.let { error ->
+                    Log.e(TAG, "getCurrencyConversion error: $error")
+                    errorMessage.value = error
+                }
+
+            }.launchIn(viewModelScope)
+
+        } catch (e: Exception) {
+            errorMessage.value = "${searchBarQueryText.value} is not supported"
+        }
+    }
+
+    private fun appendSupportedCurrencies(response: ExchangeListResponse) {
+        response.currencies.let {
+            supportedCurrenciesMap.value = response.currencies!!
+        }
+
         response.currencies.let {
             val newEntries = mutableListOf<String>()
 
@@ -127,7 +167,23 @@ class ExchangeViewModel @Inject constructor(
         }
 
         ratesList.value = newList
-        println("okej ratesList: ${ratesList.value}")
+    }
+
+    fun updateCurrencyLazyColumnList(index: Int) {
+        dropDownMenu1SelectedIndex.value = index
+        val currency = supportedCurrenciesList.value[index]
+
+        source.value = currency
+        exchangeFromCurrency.value = currency
+
+        newRatesSearch()
+    }
+
+    fun updateMenu2Label(index: Int) {
+        dropDownMenu2SelectedIndex.value = index
+        val currency = supportedCurrenciesList.value[index]
+
+        exchangeToCurrency.value = currency
     }
 
     fun onQueryChanged(query: String) {
@@ -136,6 +192,5 @@ class ExchangeViewModel @Inject constructor(
 
     private fun setQuery(query: String) {
         this.searchBarQueryText.value = query
-        savedStateHandle.set(STATE_KEY_QUERY, query)
     }
 }

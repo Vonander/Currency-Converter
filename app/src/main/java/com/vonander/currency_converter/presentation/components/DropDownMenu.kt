@@ -41,7 +41,7 @@ fun DropDownMenu(
             expanded = expanded,
             onDismissRequest = onDismissRequest,
             modifier = Modifier
-                .height(300.dp)
+                .height(400.dp)
                 .fillMaxWidth(0.5f)
                 .background(
                     color = MaterialTheme.colors.background,

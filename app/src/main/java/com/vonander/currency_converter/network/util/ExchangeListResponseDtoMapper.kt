@@ -8,16 +8,14 @@ class ExchangeListResponseDtoMapper : DomainMapper<ExchangeListResponseDto, Exch
     override fun mapToDomainModel(model: ExchangeListResponseDto): ExchangeListResponse {
         return ExchangeListResponse(
             success = model.success,
-            currencies = model.currencies,
-            error = model.error
+            currencies = model.currencies
         )
     }
 
     override fun mapFromDomainModel(domainModel: ExchangeListResponse): ExchangeListResponseDto {
         return ExchangeListResponseDto(
             success = domainModel.success,
-            currencies = domainModel.currencies,
-            error = domainModel.error
+            currencies = domainModel.currencies
         )
     }
 }

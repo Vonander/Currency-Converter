@@ -1,8 +1,10 @@
 package com.vonander.currency_converter.di
 
+import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
 import com.vonander.currency_converter.interactors.SearchLiveRates
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
+import com.vonander.currency_converter.network.util.ExchangeConvertResponseDtoMapper
 import com.vonander.currency_converter.network.util.ExchangeListResponseDtoMapper
 import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
 import dagger.Module
@@ -40,6 +42,20 @@ class InteractorsModule {
         return GetSupportedCurrencies(
             service = currencyLayerService,
             dtoMapper = exchangeListResponseDtoMapper,
+            accessKey = accessKey
+        )
+    }
+
+    @ViewModelScoped
+    @Provides
+    fun provideGetCurrencyConversion(
+        currencyLayerService: CurrencyLayerService,
+        exchangeConvertResponseDtoMapper: ExchangeConvertResponseDtoMapper,
+        @Named("accessKey") accessKey: String
+    ): GetCurrencyConversion {
+        return GetCurrencyConversion(
+            service = currencyLayerService,
+            dtoMapper = exchangeConvertResponseDtoMapper,
             accessKey = accessKey
         )
     }
