@@ -6,8 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vonander.currency_converter.domain.model.ExchangeResponse
-import com.vonander.currency_converter.interactors.SearchExchange
+import com.vonander.currency_converter.domain.model.ExchangeListResponse
+import com.vonander.currency_converter.domain.model.ExchangeLiveResponse
+import com.vonander.currency_converter.interactors.GetSupportedCurrencies
+import com.vonander.currency_converter.interactors.SearchLiveRates
 import com.vonander.currency_converter.util.STATE_KEY_QUERY
 import com.vonander.currency_converter.util.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,17 +20,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(
-    private val searchExchange: SearchExchange,
+    private val getSupportedCurrencies: GetSupportedCurrencies,
+    private val searchLiveRates: SearchLiveRates,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     val loading = mutableStateOf(false)
     val exchangeFromLabel = mutableStateOf("USD")
-    val exchangeToLabel = mutableStateOf("XXX")
-    val currencies = mutableStateOf("USD,AUD,CAD,PLN,MXN")
-    var quotesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
+    val exchangeToLabel = mutableStateOf("USD")
+    val source = mutableStateOf("USD")
+    val ratesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
+    val supportedCurrenciesList: MutableState<List<String>> = mutableStateOf(listOf("USD"))
     val searchBarQueryText = mutableStateOf("1")
-    val searchBarResultText = mutableStateOf("19.90504")
+    val searchBarResultText = mutableStateOf("1")
     val errorMessage = mutableStateOf("")
     val snackbarMessage = mutableStateOf("")
     val dropDownMenu1Expanded = mutableStateOf(false)
@@ -36,13 +40,22 @@ class ExchangeViewModel @Inject constructor(
     val dropDownMenu2Expanded = mutableStateOf(false)
     val dropDownMenu2SelectedIndex = mutableStateOf(0)
 
+    init {
+        newCurrenciesSearch()
+        //newRatesSearch()
+    }
+
     fun onTriggerEvent(event: ExchangeUseCaseEvent) {
         viewModelScope.launch {
             try {
 
                 when(event) {
-                    is ExchangeUseCaseEvent.NewSearchEvent -> {
-                        newSearch()
+                    is ExchangeUseCaseEvent.GetSupportedCurrenciesEvent -> {
+                        newCurrenciesSearch()
+                    }
+
+                    is ExchangeUseCaseEvent.SearchRatesEvent -> {
+                        newRatesSearch()
                     }
                 }
 
@@ -53,37 +66,68 @@ class ExchangeViewModel @Inject constructor(
         }
     }
 
-    private fun newSearch() {
+    private fun newCurrenciesSearch() {
+        getSupportedCurrencies.execute().onEach { dataState ->
 
-        searchExchange.execute(
-            currencies = currencies.value
+            loading.value = dataState.loading
+
+            dataState.data?.let { response ->
+                appendSupportedCurrenciesToList(response = response)
+            }
+
+            dataState.error?.let { error ->
+                errorMessage.value = error
+                println("okej newCurrenciesSearch -> error: $error")
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun newRatesSearch() {
+
+        searchLiveRates.execute(
+            source = source.value
         ).onEach { dataState ->
 
             loading.value = dataState.loading
 
             dataState.data?.let { response ->
-                appendQuotes(response)
+                appendratesToList(response)
             }
 
             dataState.error?.let { error ->
                 errorMessage.value = error
-                println("okej newSearch -> error: $error")
+                println("okej newRatesSearch -> error: $error")
             }
 
         }.launchIn(viewModelScope)
 
     }
 
-    private fun appendQuotes(response: ExchangeResponse) {
+    private fun appendSupportedCurrenciesToList(response: ExchangeListResponse) {
+        response.currencies.let {
+            val newEntries = mutableListOf<String>()
+
+            it?.entries?.forEach {
+                newEntries.add(it.key)
+            }
+
+            newEntries.sort()
+
+            supportedCurrenciesList.value = newEntries
+        }
+    }
+
+    private fun appendratesToList(response: ExchangeLiveResponse) {
         val newList = mutableListOf<HashMap<String, Double>>()
 
-        response.quotes.forEach {
+        response.quotes?.forEach {
             val newEntry = HashMap<String, Double>()
             newEntry[it.key] = it.value
             newList.add(newEntry)
         }
 
-        quotesList.value = newList
+        ratesList.value = newList
+        println("okej ratesList: ${ratesList.value}")
     }
 
     fun onQueryChanged(query: String) {

@@ -1,15 +1,12 @@
 package com.vonander.currency_converter.presentation.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.vonander.currency_converter.presentation.ExchangeViewModel
 import com.vonander.currency_converter.presentation.components.DropDownMenu
@@ -26,16 +23,14 @@ fun ExchangeView(
     val snackbarMessage = viewModel.snackbarMessage.value
     val scaffoldState = rememberScaffoldState()
 
-    val items = listOf(
-        "English",
-        "Russian",
-        "Spanish",
-        "French",
-        "German",
-        "Swedish"
-    )
-
     CurrencyConverterTheme {
+
+
+        val menu1Index = viewModel.dropDownMenu1SelectedIndex.value
+        val menu1Label = viewModel.supportedCurrenciesList.value[menu1Index]
+
+        val menu2Index = viewModel.dropDownMenu2SelectedIndex.value
+        val menu2Label = viewModel.supportedCurrenciesList.value[menu2Index]
 
         Scaffold(
             topBar = {
@@ -44,8 +39,8 @@ fun ExchangeView(
                     result = viewModel.searchBarResultText.value,
                     onQueryChanged = { viewModel.onQueryChanged( query = it) },
                     onExecuteSearch = { println("okej ExchangeView - > search!")},
-                    exchangeFromLabel = items[viewModel.dropDownMenu1SelectedIndex.value],
-                    exchangeToLabel = viewModel.exchangeToLabel.value
+                    exchangeFromLabel = menu1Label,
+                    exchangeToLabel = menu2Label
                 )
             },
             bottomBar = {},
@@ -70,7 +65,7 @@ fun ExchangeView(
                         DropDownMenu(
                             expanded = viewModel.dropDownMenu1Expanded.value,
                             selectedIndex = viewModel.dropDownMenu1SelectedIndex.value,
-                            items = items,
+                            items = viewModel.supportedCurrenciesList.value,
                             onSelect = {
                                 viewModel.dropDownMenu1SelectedIndex.value = it
                                 viewModel.dropDownMenu1Expanded.value = false
@@ -82,7 +77,6 @@ fun ExchangeView(
                                 viewModel.dropDownMenu1Expanded.value = true
                             }
                         )
-
                     }
 
                     Column(
@@ -90,18 +84,18 @@ fun ExchangeView(
                     ) {
 
                         DropDownMenu(
-                            expanded = viewModel.dropDownMenu1Expanded.value,
-                            selectedIndex = viewModel.dropDownMenu1SelectedIndex.value,
-                            items = items,
+                            expanded = viewModel.dropDownMenu2Expanded.value,
+                            selectedIndex = viewModel.dropDownMenu2SelectedIndex.value,
+                            items = viewModel.supportedCurrenciesList.value,
                             onSelect = {
-                                viewModel.dropDownMenu1SelectedIndex.value = it
-                                viewModel.dropDownMenu1Expanded.value = false
+                                viewModel.dropDownMenu2SelectedIndex.value = it
+                                viewModel.dropDownMenu2Expanded.value = false
                             },
                             onDismissRequest = {
-                                viewModel.dropDownMenu1Expanded.value = false
+                                viewModel.dropDownMenu2Expanded.value = false
                             },
                             onButtonClick = {
-                                viewModel.dropDownMenu1Expanded.value = true
+                                viewModel.dropDownMenu2Expanded.value = true
                             }
                         )
                     }

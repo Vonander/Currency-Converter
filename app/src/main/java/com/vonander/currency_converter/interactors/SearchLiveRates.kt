@@ -1,51 +1,57 @@
 package com.vonander.currency_converter.interactors
 
 import com.vonander.currency_converter.domain.DataState
-import com.vonander.currency_converter.domain.model.ExchangeResponse
-import com.vonander.currency_converter.network.model.ExchangeResponseDto
+import com.vonander.currency_converter.domain.model.ExchangeLiveResponse
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
-import com.vonander.currency_converter.network.util.ExchangeResponseDtoMapper
+import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class SearchExchange(
+class SearchLiveRates(
     private val service: CurrencyLayerService,
-    private val dtoMapper: ExchangeResponseDtoMapper,
+    private val dtoMapper: ExchangeLiveResponseDtoMapper,
     private val accessKey: String
 ) {
 
     fun execute(
-        currencies: String
-    ): Flow<DataState<ExchangeResponse>> = flow {
+        source: String
+    ): Flow<DataState<ExchangeLiveResponse>> = flow {
 
         try {
 
             emit(DataState.loading())
 
-            val response = getExchangeRateResponseFromNetwork(currencies)
+            val response = getExchangeRateResponseFromNetwork(source)
 
             emit(DataState.success(response))
 
         } catch (e: Exception) {
-            emit(DataState.error<ExchangeResponse>(e.message ?: "Unknown Error"))
+            emit(DataState.error<ExchangeLiveResponse>(e.message ?: "Unknown Error"))
         }
     }
 
     private suspend fun getExchangeRateResponseFromNetwork(
-        currencies: String
-    ): ExchangeResponse {
+        source: String
+    ): ExchangeLiveResponse {
 
-        return returnFejkResponse()
+        //return returnFejkResponse()
+
+/*        val test = service.live(
+            access_key = accessKey,
+            source = source
+        )
+
+        println("okej test: $test")*/
 
         return dtoMapper.mapToDomainModel(
-            service.search(
+            service.live(
                 access_key = accessKey,
-                currencies = currencies
+                source = source
             )
         )
     }
 
-    private fun returnFejkResponse(): ExchangeResponse {
+/*    private fun returnFejkResponse(): ExchangeRateResponse {
         val newHashMap : HashMap<String, Double> = HashMap()
         newHashMap["USDMXN"] = 19.90504
         newHashMap["USDPLN"] = 3.87835
@@ -53,7 +59,7 @@ class SearchExchange(
         newHashMap["USDUSD"] = 1.0
         newHashMap["USDCAD"] = 1.25577
 
-        val fejkResponseDto = ExchangeResponseDto(
+        val fejkResponseDto = ExchangeRateResponseDto(
             success = true,
             source = "USD",
             quotes = newHashMap
@@ -62,5 +68,5 @@ class SearchExchange(
         return dtoMapper.mapToDomainModel(
             fejkResponseDto
         )
-    }
+    }*/
 }

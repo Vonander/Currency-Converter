@@ -1,8 +1,10 @@
 package com.vonander.currency_converter.di
 
-import com.vonander.currency_converter.interactors.SearchExchange
+import com.vonander.currency_converter.interactors.GetSupportedCurrencies
+import com.vonander.currency_converter.interactors.SearchLiveRates
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
-import com.vonander.currency_converter.network.util.ExchangeResponseDtoMapper
+import com.vonander.currency_converter.network.util.ExchangeListResponseDtoMapper
+import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,14 +18,28 @@ class InteractorsModule {
 
     @ViewModelScoped
     @Provides
-    fun provideSearchExchange(
+    fun provideSearchLiveRates(
         currencyLayerService: CurrencyLayerService,
-        exchangeResponseDtoMapper: ExchangeResponseDtoMapper,
+        exchangeLiveResponseDtoMapper: ExchangeLiveResponseDtoMapper,
         @Named("accessKey") accessKey: String
-    ): SearchExchange {
-        return SearchExchange(
+    ): SearchLiveRates {
+        return SearchLiveRates(
             service = currencyLayerService,
-            dtoMapper = exchangeResponseDtoMapper,
+            dtoMapper = exchangeLiveResponseDtoMapper,
+            accessKey = accessKey
+        )
+    }
+
+    @ViewModelScoped
+    @Provides
+    fun provideGetSupportedCurrencies(
+        currencyLayerService: CurrencyLayerService,
+        exchangeListResponseDtoMapper: ExchangeListResponseDtoMapper,
+        @Named("accessKey") accessKey: String
+    ): GetSupportedCurrencies {
+        return GetSupportedCurrencies(
+            service = currencyLayerService,
+            dtoMapper = exchangeListResponseDtoMapper,
             accessKey = accessKey
         )
     }
