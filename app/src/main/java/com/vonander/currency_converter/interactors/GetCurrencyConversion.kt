@@ -24,6 +24,8 @@ class GetCurrencyConversion(
 
             val response = GetCurrencyConversionFromNetwork(from, to, amount)
 
+            println("okej response: $response")
+
             emit(DataState.success(response))
 
         } catch (e: Exception) {
