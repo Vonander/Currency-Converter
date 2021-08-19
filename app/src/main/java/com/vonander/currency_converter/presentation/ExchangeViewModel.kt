@@ -63,7 +63,7 @@ class ExchangeViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                Log.e(TAG,"onTriggerEvent: $event Exception: $e, ${e.cause}")
+                setErrorMessage(error ="onTriggerEvent: $event Exception: $e, ${e.cause}" )
             }
         }
     }
@@ -78,8 +78,7 @@ class ExchangeViewModel @Inject constructor(
             }
 
             dataState.error?.let { error ->
-                errorMessage.value = error
-                println("okej newCurrenciesSearch -> error: $error")
+                setErrorMessage(error = "getSupportedCurrencies error Exception: $error")
             }
         }.launchIn(viewModelScope)
     }
@@ -92,12 +91,11 @@ class ExchangeViewModel @Inject constructor(
             loading.value = dataState.loading
 
             dataState.data?.let { response ->
-                appendratesToList(response)
+                appendRatesToList(response)
             }
 
             dataState.error?.let { error ->
-                errorMessage.value = error
-                println("okej newRatesSearch -> error: $error")
+                setErrorMessage(error = "newRatesSearch error Exception: $error")
             }
 
         }.launchIn(viewModelScope)
@@ -107,7 +105,7 @@ class ExchangeViewModel @Inject constructor(
         val amount: Double
 
         if (exchangeFromCurrency.value.isBlank() || exchangeToCurrency.value.isBlank()) {
-            errorMessage.value = "Currencies are not set"
+            setErrorMessage(error = "Currencies are not set")
 
             return
         }
@@ -128,14 +126,15 @@ class ExchangeViewModel @Inject constructor(
                 }
 
                 dataState.error?.let { error ->
-                    Log.e(TAG, "getCurrencyConversion error: $error")
-                    errorMessage.value = error
+                    setErrorMessage(error = "getCurrencyConversion error: $error")
                 }
 
             }.launchIn(viewModelScope)
 
         } catch (e: Exception) {
-            errorMessage.value = "${searchBarQueryText.value} is not supported"
+            setErrorMessage(
+                error = "getCurrencyConversion error Exception: $e ${searchBarQueryText.value} is not supported"
+            )
         }
     }
 
@@ -157,7 +156,7 @@ class ExchangeViewModel @Inject constructor(
         }
     }
 
-    private fun appendratesToList(response: ExchangeLiveResponse) {
+    private fun appendRatesToList(response: ExchangeLiveResponse) {
         val newList = mutableListOf<HashMap<String, Double>>()
 
         response.quotes?.forEach {
@@ -179,7 +178,7 @@ class ExchangeViewModel @Inject constructor(
         newRatesSearch()
     }
 
-    fun updateMenu2Label(index: Int) {
+    fun updateDropdownMenu2Label(index: Int) {
         dropDownMenu2SelectedIndex.value = index
         val currency = supportedCurrenciesList.value[index]
 
@@ -192,5 +191,10 @@ class ExchangeViewModel @Inject constructor(
 
     private fun setQuery(query: String) {
         this.searchBarQueryText.value = query
+    }
+
+    private fun setErrorMessage(error: String) {
+        errorMessage.value = error
+        Log.e(TAG, error)
     }
 }

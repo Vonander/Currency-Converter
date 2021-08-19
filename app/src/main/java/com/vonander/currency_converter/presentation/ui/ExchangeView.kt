@@ -7,14 +7,12 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.vonander.currency_converter.presentation.ExchangeUseCaseEvent
 import com.vonander.currency_converter.presentation.ExchangeViewModel
-import com.vonander.currency_converter.presentation.components.CustomLazyColumn
-import com.vonander.currency_converter.presentation.components.DefaultSnackbar
-import com.vonander.currency_converter.presentation.components.DropDownMenu
-import com.vonander.currency_converter.presentation.components.SearchBar
+import com.vonander.currency_converter.presentation.components.*
 import com.vonander.currency_converter.ui.theme.CurrencyConverterTheme
 import kotlinx.coroutines.launch
 
@@ -22,11 +20,13 @@ import kotlinx.coroutines.launch
 fun ExchangeView(
     viewModel: ExchangeViewModel
 ) {
+    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
 
     CurrencyConverterTheme {
 
         Scaffold(
+
             topBar = {
                 SearchBar(
                     viewModel = viewModel,
@@ -38,6 +38,7 @@ fun ExchangeView(
                     }
                 )
             },
+
             bottomBar = {
                 Box(
                     modifier = Modifier.padding(bottom = 50.dp)
@@ -64,8 +65,11 @@ fun ExchangeView(
                     }
                 }
             },
+
             scaffoldState = scaffoldState,
-            drawerContent = {},
+
+            drawerContent = { AboutView(context = context)},
+
             snackbarHost = { scaffoldState.snackbarHostState }
         ) {
 
@@ -102,7 +106,7 @@ fun ExchangeView(
                         items = viewModel.supportedCurrenciesList.value,
                         onSelect = {
                             viewModel.dropDownMenu2Expanded.value = false
-                            viewModel.updateMenu2Label(index = it)
+                            viewModel.updateDropdownMenu2Label(index = it)
                         },
                         onDismissRequest = {
                             viewModel.dropDownMenu2Expanded.value = false
