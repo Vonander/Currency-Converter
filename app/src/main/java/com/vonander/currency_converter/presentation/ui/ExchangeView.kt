@@ -46,9 +46,9 @@ fun ExchangeView(
 
                     CustomLazyColumn(viewModel = viewModel)
 
-                    if (viewModel.snackbarMessage.value.isNotBlank()) {
+                    if (viewModel.errorMessage.value.isNotBlank()) {
 
-                        initSnackbar(
+                        showSnackbar(
                             viewModel = viewModel,
                             scaffoldState = scaffoldState
                         )
@@ -121,17 +121,15 @@ fun ExchangeView(
     }
 }
 
-private fun initSnackbar(
+private fun showSnackbar(
     viewModel: ExchangeViewModel,
     scaffoldState: ScaffoldState
 ) {
 
     viewModel.viewModelScope.launch {
         scaffoldState.snackbarHostState.showSnackbar(
-            message = viewModel.snackbarMessage.value,
+            message = viewModel.errorMessage.value,
             actionLabel = "Hide"
         )
-
-        viewModel.snackbarMessage.value = ""
     }
 }

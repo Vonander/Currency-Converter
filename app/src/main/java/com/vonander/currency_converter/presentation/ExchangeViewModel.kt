@@ -34,7 +34,6 @@ class ExchangeViewModel @Inject constructor(
     val searchBarQueryText = mutableStateOf("1")
     val searchBarResultText = mutableStateOf("=")
     val errorMessage = mutableStateOf("")
-    val snackbarMessage = mutableStateOf("")
     val dropDownMenu1Expanded = mutableStateOf(false)
     val dropDownMenu1SelectedIndex = mutableStateOf(0)
     val dropDownMenu2Expanded = mutableStateOf(false)
