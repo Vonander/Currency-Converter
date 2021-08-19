@@ -31,7 +31,7 @@ fun DropDownMenu(
         ) {
             Text(
                 text = items[selectedIndex],
-                color = MaterialTheme.colors.onBackground,
+                color = MaterialTheme.colors.onPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -61,7 +61,7 @@ fun DropDownMenu(
                     ) {
                         Text(
                             text = string,
-                            color = MaterialTheme.colors.onBackground,
+                            color = MaterialTheme.colors.onPrimary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -71,14 +71,14 @@ fun DropDownMenu(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                color = MaterialTheme.colors.primary,
+                                color = MaterialTheme.colors.primaryVariant,
                                 shape = RoundedCornerShape(16.dp)
                             ),
                         onClick = { onSelect(index) }
                     ) {
                         Text(
                             text = string,
-                            color = MaterialTheme.colors.onBackground,
+                            color = MaterialTheme.colors.onPrimary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )

@@ -68,7 +68,7 @@ fun ExchangeView(
 
             scaffoldState = scaffoldState,
 
-            drawerContent = { AboutView(context = context)},
+            drawerContent = { AboutView(context = context) },
 
             snackbarHost = { scaffoldState.snackbarHostState }
         ) {

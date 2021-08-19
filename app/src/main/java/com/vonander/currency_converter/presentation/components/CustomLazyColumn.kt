@@ -27,7 +27,7 @@ fun CustomLazyColumn(
             .horizontalScroll(
                 state = ScrollState(0), enabled = true
             )
-            .background(color = MaterialTheme.colors.primary)
+            .background(color = MaterialTheme.colors.background)
     ) {
         itemsIndexed(
             items = viewModel.ratesList.value
@@ -35,8 +35,8 @@ fun CustomLazyColumn(
 
             Text(
                 text = "$rates",
-                modifier = Modifier
-                    .padding(5.dp)
+                color = MaterialTheme.colors.onBackground,
+                modifier = Modifier.padding(5.dp)
             )
         }
     }

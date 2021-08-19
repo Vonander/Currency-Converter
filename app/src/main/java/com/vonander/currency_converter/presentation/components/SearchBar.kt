@@ -29,7 +29,7 @@ fun SearchBar(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colors.secondary,
+        color = MaterialTheme.colors.background,
         elevation = 8.dp
     ) {
 
@@ -63,9 +63,9 @@ fun SearchBar(
                             focusManager.clearFocus(force = true)
                         }
                     ),
-                    textStyle = TextStyle(color = MaterialTheme.colors.onSurface),
+                    textStyle = TextStyle(color = MaterialTheme.colors.onPrimary),
                     colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = MaterialTheme.colors.surface
+                        backgroundColor = MaterialTheme.colors.primary
                     ),
                 )
 
@@ -75,9 +75,9 @@ fun SearchBar(
                     onValueChange = {},
                     enabled = false,
                     label = { Text( text = exchangeToLabel) },
-                    textStyle = TextStyle(color = MaterialTheme.colors.onSurface),
+                    textStyle = TextStyle(color = MaterialTheme.colors.onPrimary),
                     colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = MaterialTheme.colors.surface
+                        backgroundColor = MaterialTheme.colors.primary
                     )
                 )
             }
