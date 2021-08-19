@@ -14,16 +14,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.vonander.currency_converter.presentation.ExchangeViewModel
 
 @Composable
 fun SearchBar(
-    query: String,
-    result: String,
+    viewModel: ExchangeViewModel,
     onQueryChanged: (String) -> Unit,
-    onExecuteSearch: () -> Unit,
-    exchangeFromLabel: String,
-    exchangeToLabel: String
+    onExecuteSearch: () -> Unit
 ) {
+    val query = viewModel.searchBarQueryText.value
+    val result = viewModel.searchBarResultText.value
+    val exchangeFromLabel = viewModel.exchangeFromCurrency.value
+    val exchangeToLabel = viewModel.exchangeToCurrency.value
 
     Surface(
         modifier = Modifier.fillMaxWidth(),

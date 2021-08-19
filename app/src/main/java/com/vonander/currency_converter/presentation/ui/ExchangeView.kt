@@ -1,33 +1,27 @@
 package com.vonander.currency_converter.presentation.ui
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.vonander.currency_converter.presentation.ExchangeUseCaseEvent
 import com.vonander.currency_converter.presentation.ExchangeViewModel
+import com.vonander.currency_converter.presentation.components.CustomLazyColumn
+import com.vonander.currency_converter.presentation.components.DefaultSnackbar
 import com.vonander.currency_converter.presentation.components.DropDownMenu
 import com.vonander.currency_converter.presentation.components.SearchBar
 import com.vonander.currency_converter.ui.theme.CurrencyConverterTheme
-
+import kotlinx.coroutines.launch
 
 @Composable
 fun ExchangeView(
     viewModel: ExchangeViewModel
 ) {
-
-    val context = LocalContext.current
-    val snackbarMessage = viewModel.snackbarMessage.value
     val scaffoldState = rememberScaffoldState()
 
     CurrencyConverterTheme {
@@ -35,40 +29,38 @@ fun ExchangeView(
         Scaffold(
             topBar = {
                 SearchBar(
-                    query = viewModel.searchBarQueryText.value,
-                    result = viewModel.searchBarResultText.value,
+                    viewModel = viewModel,
                     onQueryChanged = { viewModel.onQueryChanged( query = it) },
                     onExecuteSearch = {
                         viewModel.onTriggerEvent(
                             event = ExchangeUseCaseEvent.GetCurrencyConversion
                         )
-                    },
-                    exchangeFromLabel = viewModel.exchangeFromCurrency.value,
-                    exchangeToLabel = viewModel.exchangeToCurrency.value
+                    }
                 )
             },
             bottomBar = {
-                Column(modifier = Modifier.padding(bottom = 50.dp)) {
+                Box(
+                    modifier = Modifier.padding(bottom = 50.dp)
+                ) {
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxHeight(0.6f)
-                            .fillMaxWidth()
-                            .horizontalScroll(
-                                state = ScrollState(0), enabled = true
-                            )
-                            .background(color = MaterialTheme.colors.primary)
-                    ) {
-                        itemsIndexed(
-                            items = viewModel.ratesList.value
-                        ) { _, rates ->
+                    CustomLazyColumn(viewModel = viewModel)
 
-                            Text(
-                                text = "$rates",
-                                modifier = Modifier
-                                    .padding(5.dp)
-                            )
-                        }
+                    if (viewModel.snackbarMessage.value.isNotBlank()) {
+
+                        initSnackbar(
+                            viewModel = viewModel,
+                            scaffoldState = scaffoldState
+                        )
+
+                        DefaultSnackbar(
+                            snackbarHostState = scaffoldState.snackbarHostState,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 10.dp),
+                            onDismiss = {
+                                scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                            }
+                        )
                     }
                 }
             },
@@ -122,5 +114,20 @@ fun ExchangeView(
                 }
             }
         }
+    }
+}
+
+private fun initSnackbar(
+    viewModel: ExchangeViewModel,
+    scaffoldState: ScaffoldState
+) {
+
+    viewModel.viewModelScope.launch {
+        scaffoldState.snackbarHostState.showSnackbar(
+            message = viewModel.snackbarMessage.value,
+            actionLabel = "Hide"
+        )
+
+        viewModel.snackbarMessage.value = ""
     }
 }
