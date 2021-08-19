@@ -7,7 +7,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.vonander.currency_converter.presentation.ExchangeUseCaseEvent
@@ -20,13 +19,11 @@ import kotlinx.coroutines.launch
 fun ExchangeView(
     viewModel: ExchangeViewModel
 ) {
-    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
 
     CurrencyConverterTheme {
 
         Scaffold(
-
             topBar = {
                 SearchBar(
                     viewModel = viewModel,
@@ -68,7 +65,7 @@ fun ExchangeView(
 
             scaffoldState = scaffoldState,
 
-            drawerContent = { AboutView(context = context) },
+            drawerContent = { AboutView() },
 
             snackbarHost = { scaffoldState.snackbarHostState }
         ) {

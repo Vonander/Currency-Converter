@@ -1,9 +1,5 @@
 package com.vonander.currency_converter.presentation.components
 
-import android.content.Context
-import android.view.ViewGroup
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,13 +11,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.vonander.currency_converter.ui.theme.CurrencyConverterTheme
 
 @Composable
-fun AboutView (
-    context: Context
-) {
+fun AboutView () {
     val uriHandler = LocalUriHandler.current
     val url = "https://www.linkedin.com/in/johanfornander/"
 
@@ -67,35 +60,9 @@ fun AboutView (
                                 uriHandler.openUri(url)
                             }
                     )
-
                 }
-
-                WebPageScreen(
-                    context = context,
-                    urlToRender = url
-                )
             }
         }
     }
-}
-
-@Composable
-fun WebPageScreen(
-    context: Context,
-    urlToRender: String
-) {
-
-    AndroidView(
-        factory = {
-            WebView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                webViewClient = WebViewClient()
-                loadUrl(urlToRender)
-            }
-        }, update = { it.loadUrl(urlToRender) }
-    )
 }
 

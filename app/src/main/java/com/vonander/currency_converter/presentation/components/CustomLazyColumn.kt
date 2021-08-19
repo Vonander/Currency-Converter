@@ -34,10 +34,42 @@ fun CustomLazyColumn(
         ) { _, rates ->
 
             Text(
-                text = "$rates",
+                text = convertToReadableText(
+                    viewModel = viewModel,
+                    rates = rates
+                ),
                 color = MaterialTheme.colors.onBackground,
                 modifier = Modifier.padding(5.dp)
             )
         }
     }
+}
+
+private fun convertToReadableText(
+    viewModel: ExchangeViewModel,
+    rates: HashMap<String, Double>
+): String {
+
+    val keyString: String = rates.keys.toString()
+    val valueString: String = rates.values.toString()
+
+    val fromCurrency = keyString.drop(1).dropLast(4)
+    val toCurrency = keyString.drop(4).dropLast(1)
+    val amount = valueString.drop(1).dropLast(1)
+
+    var fromCurrencyLong = ""
+    var toCurrencyLong = ""
+
+    viewModel.supportedCurrenciesMap.value.map { (key, value) ->
+
+        if (key == fromCurrency) {
+            fromCurrencyLong = value
+        }
+
+        if (key == toCurrency) {
+            toCurrencyLong = value
+        }
+    }
+
+    return "$fromCurrencyLong -> $toCurrencyLong = $amount"
 }
