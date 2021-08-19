@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
 @Parcelize
-data class ExchangeConvertResponse(
+data class ConvertResponse(
     var success: Boolean,
     var result: Double?,
     var error: HashMap<String, @RawValue Any>?

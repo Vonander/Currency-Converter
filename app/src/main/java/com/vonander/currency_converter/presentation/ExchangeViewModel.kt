@@ -5,9 +5,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vonander.currency_converter.domain.model.ExchangeConvertResponse
-import com.vonander.currency_converter.domain.model.ExchangeListResponse
-import com.vonander.currency_converter.domain.model.ExchangeLiveResponse
+import com.vonander.currency_converter.domain.model.ConvertResponse
+import com.vonander.currency_converter.domain.model.ListResponse
+import com.vonander.currency_converter.domain.model.LiveResponse
 import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
 import com.vonander.currency_converter.interactors.SearchLiveRates
@@ -139,7 +139,7 @@ class ExchangeViewModel @Inject constructor(
         }
     }
 
-    private fun appendSupportedCurrencies(response: ExchangeListResponse) {
+    private fun appendSupportedCurrencies(response: ListResponse) {
         response.currencies.let {
             supportedCurrenciesMap.value = response.currencies!!
         }
@@ -157,7 +157,7 @@ class ExchangeViewModel @Inject constructor(
         }
     }
 
-    private fun appendRatesToList(response: ExchangeLiveResponse) {
+    private fun appendRatesToList(response: LiveResponse) {
         if (!response.success) {
             errorMessage.value = (response.error?.get("info") ?: "Unknown Api error").toString()
             defaultToUSD()
@@ -174,7 +174,7 @@ class ExchangeViewModel @Inject constructor(
         ratesList.value = newList
     }
 
-    private fun handleConversionResponse(response: ExchangeConvertResponse) {
+    private fun handleConversionResponse(response: ConvertResponse) {
         if (!response.success) {
             Log.e(TAG, (response.error?.get("info")
                 ?: "Unknown Api error").toString() + "Calculating with stashed values")

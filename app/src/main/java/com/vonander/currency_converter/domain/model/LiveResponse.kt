@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
 @Parcelize
-data class ExchangeLiveResponse(
+data class LiveResponse(
     var success: Boolean,
     var source: String?,
     var quotes: HashMap<String, Double>?,

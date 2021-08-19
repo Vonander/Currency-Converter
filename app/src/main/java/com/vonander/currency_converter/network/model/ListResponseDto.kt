@@ -2,7 +2,7 @@ package com.vonander.currency_converter.network.model
 
 import com.google.gson.annotations.SerializedName
 
-data class ExchangeListResponseDto(
+data class ListResponseDto(
     @SerializedName("success")
     var success: Boolean,
 

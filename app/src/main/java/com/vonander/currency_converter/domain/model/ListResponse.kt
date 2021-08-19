@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class ExchangeListResponse(
+data class ListResponse(
     var success: Boolean,
     var currencies: HashMap<String, String>?
 ): Parcelable

@@ -5,9 +5,9 @@ import com.vonander.currency_converter.network.data.MockWebServerResponses.curre
 import com.vonander.currency_converter.network.data.MockWebServerResponses.liveRatesRespondses
 import com.vonander.currency_converter.network.data.MockWebServerResponses.supportedCurrenciesResponses
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
-import com.vonander.currency_converter.network.util.ExchangeConvertResponseDtoMapper
-import com.vonander.currency_converter.network.util.ExchangeListResponseDtoMapper
-import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
+import com.vonander.currency_converter.network.util.ConvertResponseDtoMapper
+import com.vonander.currency_converter.network.util.ListResponseDtoMapper
+import com.vonander.currency_converter.network.util.LiveResponseDtoMapper
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
@@ -32,9 +32,9 @@ class ExchangeViewTest {
 
     private lateinit var currencyLayerService: CurrencyLayerService
 
-    private val exchangeListResponseDtoMapper = ExchangeListResponseDtoMapper()
-    private val exchangeLiveResponseDtoMapper = ExchangeLiveResponseDtoMapper()
-    private val exchangeConvertResponseDtoMapper = ExchangeConvertResponseDtoMapper()
+    private val exchangeListResponseDtoMapper = ListResponseDtoMapper()
+    private val exchangeLiveResponseDtoMapper = LiveResponseDtoMapper()
+    private val exchangeConvertResponseDtoMapper = ConvertResponseDtoMapper()
 
     private val mockAccessKey = "1234"
     private val mockSource = "USD"

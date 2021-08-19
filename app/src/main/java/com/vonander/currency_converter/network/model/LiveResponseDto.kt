@@ -1,15 +1,17 @@
 package com.vonander.currency_converter.network.model
 
 import com.google.gson.annotations.SerializedName
-import kotlinx.parcelize.RawValue
 
-data class ExchangeConvertResponseDto(
+data class LiveResponseDto(
     @SerializedName("success")
     var success: Boolean,
 
-    @SerializedName("result")
-    var result: Double?,
+    @SerializedName("source")
+    var source:  String?,
+
+    @SerializedName("quotes")
+    var quotes: HashMap<String, Double>?,
 
     @SerializedName("error")
-    var error: HashMap<String, @RawValue Any>?
+    var error: HashMap<String, Any>?
 )

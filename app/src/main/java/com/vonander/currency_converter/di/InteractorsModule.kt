@@ -1,12 +1,14 @@
 package com.vonander.currency_converter.di
 
+import com.vonander.currency_converter.cache.LiveResponseDao
+import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
 import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
 import com.vonander.currency_converter.interactors.SearchLiveRates
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
-import com.vonander.currency_converter.network.util.ExchangeConvertResponseDtoMapper
-import com.vonander.currency_converter.network.util.ExchangeListResponseDtoMapper
-import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
+import com.vonander.currency_converter.network.util.ConvertResponseDtoMapper
+import com.vonander.currency_converter.network.util.ListResponseDtoMapper
+import com.vonander.currency_converter.network.util.LiveResponseDtoMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,13 +23,17 @@ class InteractorsModule {
     @ViewModelScoped
     @Provides
     fun provideSearchLiveRates(
+        liveResponseDao: LiveResponseDao,
         currencyLayerService: CurrencyLayerService,
-        exchangeLiveResponseDtoMapper: ExchangeLiveResponseDtoMapper,
+        entityMapper: LiveResponseEntityMapper,
+        liveResponseDtoMapper: LiveResponseDtoMapper,
         @Named("accessKey") accessKey: String
     ): SearchLiveRates {
         return SearchLiveRates(
+            liveResponseDao = liveResponseDao,
             service = currencyLayerService,
-            dtoMapper = exchangeLiveResponseDtoMapper,
+            entityMapper = entityMapper,
+            dtoMapper = liveResponseDtoMapper,
             accessKey = accessKey
         )
     }
@@ -36,12 +42,12 @@ class InteractorsModule {
     @Provides
     fun provideGetSupportedCurrencies(
         currencyLayerService: CurrencyLayerService,
-        exchangeListResponseDtoMapper: ExchangeListResponseDtoMapper,
+        listResponseDtoMapper: ListResponseDtoMapper,
         @Named("accessKey") accessKey: String
     ): GetSupportedCurrencies {
         return GetSupportedCurrencies(
             service = currencyLayerService,
-            dtoMapper = exchangeListResponseDtoMapper,
+            dtoMapper = listResponseDtoMapper,
             accessKey = accessKey
         )
     }
@@ -50,12 +56,12 @@ class InteractorsModule {
     @Provides
     fun provideGetCurrencyConversion(
         currencyLayerService: CurrencyLayerService,
-        exchangeConvertResponseDtoMapper: ExchangeConvertResponseDtoMapper,
+        convertResponseDtoMapper: ConvertResponseDtoMapper,
         @Named("accessKey") accessKey: String
     ): GetCurrencyConversion {
         return GetCurrencyConversion(
             service = currencyLayerService,
-            dtoMapper = exchangeConvertResponseDtoMapper,
+            dtoMapper = convertResponseDtoMapper,
             accessKey = accessKey
         )
     }

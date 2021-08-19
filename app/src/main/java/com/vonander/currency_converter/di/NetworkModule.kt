@@ -2,9 +2,9 @@ package com.vonander.currency_converter.di
 
 import com.google.gson.GsonBuilder
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
-import com.vonander.currency_converter.network.util.ExchangeConvertResponseDtoMapper
-import com.vonander.currency_converter.network.util.ExchangeListResponseDtoMapper
-import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
+import com.vonander.currency_converter.network.util.ConvertResponseDtoMapper
+import com.vonander.currency_converter.network.util.ListResponseDtoMapper
+import com.vonander.currency_converter.network.util.LiveResponseDtoMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,20 +20,20 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideExchangeLiveResponseDtoMapper() : ExchangeLiveResponseDtoMapper {
-        return ExchangeLiveResponseDtoMapper()
+    fun provideExchangeLiveResponseDtoMapper() : LiveResponseDtoMapper {
+        return LiveResponseDtoMapper()
     }
 
     @Singleton
     @Provides
-    fun provideExchangeListResponseDtoMapper() : ExchangeListResponseDtoMapper {
-        return ExchangeListResponseDtoMapper()
+    fun provideExchangeListResponseDtoMapper() : ListResponseDtoMapper {
+        return ListResponseDtoMapper()
     }
 
     @Singleton
     @Provides
-    fun provideExchangeConvertResponseDtoMapper() : ExchangeConvertResponseDtoMapper {
-        return ExchangeConvertResponseDtoMapper()
+    fun provideExchangeConvertResponseDtoMapper() : ConvertResponseDtoMapper {
+        return ConvertResponseDtoMapper()
     }
 
     @Singleton

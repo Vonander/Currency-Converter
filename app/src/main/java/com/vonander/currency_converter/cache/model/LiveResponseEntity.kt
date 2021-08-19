@@ -8,9 +8,15 @@ import androidx.room.PrimaryKey
 data class LiveResponseEntity(
 
     @PrimaryKey(autoGenerate = false)
-    @ColumnInfo(name = "currencyKey")
-    var currencyKey: String,
+    @ColumnInfo(name = "success")
+    var success: String,
 
-    @ColumnInfo(name ="currencyRate")
-    var currencyRate:  Long,
+    @ColumnInfo(name = "source")
+    var source: String?,
+
+    @ColumnInfo(name = "quotes")
+    var quotes: String?,
+
+    @ColumnInfo(name ="error")
+    var error: String?,
 )

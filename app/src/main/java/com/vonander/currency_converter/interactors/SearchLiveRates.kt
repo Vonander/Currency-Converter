@@ -1,20 +1,24 @@
 package com.vonander.currency_converter.interactors
 
+import com.vonander.currency_converter.cache.LiveResponseDao
+import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
 import com.vonander.currency_converter.domain.DataState
-import com.vonander.currency_converter.domain.model.ExchangeLiveResponse
+import com.vonander.currency_converter.domain.model.LiveResponse
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
-import com.vonander.currency_converter.network.util.ExchangeLiveResponseDtoMapper
+import com.vonander.currency_converter.network.util.LiveResponseDtoMapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class SearchLiveRates(
+    private val liveResponseDao: LiveResponseDao,
     private val service: CurrencyLayerService,
-    private val dtoMapper: ExchangeLiveResponseDtoMapper,
+    private val entityMapper: LiveResponseEntityMapper,
+    private val dtoMapper: LiveResponseDtoMapper,
     private val accessKey: String
 ) {
     fun execute(
         source: String
-    ): Flow<DataState<ExchangeLiveResponse>> = flow {
+    ): Flow<DataState<LiveResponse>> = flow {
         try {
             emit(DataState.loading())
 
@@ -23,13 +27,13 @@ class SearchLiveRates(
             emit(DataState.success(response))
 
         } catch (e: Exception) {
-            emit(DataState.error<ExchangeLiveResponse>(e.message ?: "Unknown search live rates Error"))
+            emit(DataState.error<LiveResponse>(e.message ?: "Unknown search live rates Error"))
         }
     }
 
     private suspend fun getExchangeRateResponseFromNetwork(
         source: String
-    ): ExchangeLiveResponse {
+    ): LiveResponse {
 
         return dtoMapper.mapToDomainModel(
             service.live(
