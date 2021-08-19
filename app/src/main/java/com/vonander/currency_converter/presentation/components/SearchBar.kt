@@ -1,5 +1,6 @@
 package com.vonander.currency_converter.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -52,10 +53,22 @@ fun SearchBar(
                         imeAction = ImeAction.Search
                     ),
                     leadingIcon = {
-                        Icon(imageVector = Icons.Filled.Search, "search icon")
+                        Icon(
+                            imageVector = Icons.Filled.Search, "search icon",
+                            modifier = Modifier.clickable {
+                                onExecuteSearch()
+                                focusManager.clearFocus(force = true)
+                            }
+                        )
                     },
                     trailingIcon = {
-                        Icon(imageVector = Icons.Filled.ArrowForward, "arrow forward")
+                        Icon(
+                            imageVector = Icons.Filled.ArrowForward, "arrow forward",
+                            modifier = Modifier.clickable {
+                                onExecuteSearch()
+                                focusManager.clearFocus(force = true)
+                            }
+                        )
                     },
                     keyboardActions = KeyboardActions(
                         onSearch = {
