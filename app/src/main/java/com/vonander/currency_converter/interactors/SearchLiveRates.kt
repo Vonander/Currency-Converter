@@ -19,7 +19,6 @@ class SearchLiveRates(
             emit(DataState.loading())
 
             val response = getExchangeRateResponseFromNetwork(source)
-            println("okej SearchLiveRates: response: $response")
 
             emit(DataState.success(response))
 

@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vonander.currency_converter.domain.model.ExchangeConvertResponse
 import com.vonander.currency_converter.domain.model.ExchangeListResponse
 import com.vonander.currency_converter.domain.model.ExchangeLiveResponse
 import com.vonander.currency_converter.interactors.GetCurrencyConversion
@@ -79,6 +80,7 @@ class ExchangeViewModel @Inject constructor(
             dataState.error?.let { error ->
                 setErrorMessage(error = "getSupportedCurrencies error Exception: $error")
             }
+
         }.launchIn(viewModelScope)
     }
 
@@ -121,7 +123,7 @@ class ExchangeViewModel @Inject constructor(
                 loading.value = dataState.loading
 
                 dataState.data?.let { response ->
-                    searchBarResultText.value = "= ${response.result}"
+                    handleConversionResponse(response)
                 }
 
                 dataState.error?.let { error ->
@@ -156,6 +158,11 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun appendRatesToList(response: ExchangeLiveResponse) {
+        if (!response.success) {
+            errorMessage.value = (response.error?.get("info") ?: "Unknown Api error").toString()
+            defaultToUSD()
+        }
+
         val newList = mutableListOf<HashMap<String, Double>>()
 
         response.quotes?.forEach {
@@ -165,6 +172,38 @@ class ExchangeViewModel @Inject constructor(
         }
 
         ratesList.value = newList
+    }
+
+    private fun handleConversionResponse(response: ExchangeConvertResponse) {
+        if (!response.success) {
+            Log.e(TAG, (response.error?.get("info")
+                ?: "Unknown Api error").toString() + "Calculating with stashed values")
+
+            var rate = ""
+
+            ratesList.value.onEach { hashMap ->
+
+                val currencyString: String = hashMap.keys.toString()
+                val rateString: String = hashMap.values.toString()
+
+                val currencyStringShort = currencyString.drop(4).dropLast(1)
+                val rateStringEdited = rateString.drop(1).dropLast(1)
+
+                if (currencyStringShort == exchangeToCurrency.value) {
+                    rate = rateStringEdited
+                }
+            }
+
+            val amount: Double = searchBarQueryText.value.toDouble()
+            val rateDouble: Double = rate.toDouble()
+            val currencyConverted = amount * rateDouble
+
+            searchBarResultText.value = "= $currencyConverted"
+
+            return
+        }
+
+        searchBarResultText.value = "= ${response.result}"
     }
 
     fun updateCurrencyLazyColumnList(index: Int) {
@@ -195,5 +234,17 @@ class ExchangeViewModel @Inject constructor(
     private fun setErrorMessage(error: String) {
         errorMessage.value = error
         Log.e(TAG, error)
+    }
+
+    private fun defaultToUSD() {
+        exchangeFromCurrency.value = "USD"
+        supportedCurrenciesList.value.forEachIndexed { index, currency ->
+            if (currency == "USD") {
+                dropDownMenu1SelectedIndex.value = index
+            }
+        }
+
+        source.value = "USD"
+        newRatesSearch()
     }
 }

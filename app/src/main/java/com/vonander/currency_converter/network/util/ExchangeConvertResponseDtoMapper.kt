@@ -8,14 +8,16 @@ class ExchangeConvertResponseDtoMapper : DomainMapper<ExchangeConvertResponseDto
     override fun mapToDomainModel(model: ExchangeConvertResponseDto): ExchangeConvertResponse {
         return ExchangeConvertResponse(
             success = model.success,
-            result = model.result
+            result = model.result,
+            error = model.error
         )
     }
 
     override fun mapFromDomainModel(domainModel: ExchangeConvertResponse): ExchangeConvertResponseDto {
         return ExchangeConvertResponseDto(
             success = domainModel.success,
-            result = domainModel.result
+            result = domainModel.result,
+            error = domainModel.error
         )
     }
 }

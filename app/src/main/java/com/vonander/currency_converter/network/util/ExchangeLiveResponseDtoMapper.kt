@@ -9,7 +9,8 @@ class ExchangeLiveResponseDtoMapper : DomainMapper<ExchangeLiveResponseDto, Exch
         return ExchangeLiveResponse(
             success = model.success,
             source = model.source,
-            quotes = model.quotes
+            quotes = model.quotes,
+            error = model.error
         )
     }
 
@@ -17,7 +18,8 @@ class ExchangeLiveResponseDtoMapper : DomainMapper<ExchangeLiveResponseDto, Exch
         return ExchangeLiveResponseDto(
             success = domainModel.success,
             source = domainModel.source,
-            quotes = domainModel.quotes
+            quotes = domainModel.quotes,
+            error = domainModel.error
         )
     }
 }

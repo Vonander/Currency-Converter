@@ -10,5 +10,8 @@ data class ExchangeLiveResponseDto(
     var source:  String?,
 
     @SerializedName("quotes")
-    var quotes: HashMap<String, Double>?
+    var quotes: HashMap<String, Double>?,
+
+    @SerializedName("error")
+    var error: HashMap<String, Any>?
 )
