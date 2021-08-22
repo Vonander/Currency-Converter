@@ -1,6 +1,8 @@
 package com.vonander.currency_converter.di
 
+import com.vonander.currency_converter.cache.ListResponseDao
 import com.vonander.currency_converter.cache.LiveResponseDao
+import com.vonander.currency_converter.cache.util.ListResponseEntityMapper
 import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
 import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
@@ -33,7 +35,7 @@ class InteractorsModule {
             liveResponseDao = liveResponseDao,
             service = currencyLayerService,
             entityMapper = entityMapper,
-            dtoMapper = liveResponseDtoMapper,
+            liveDtoMapper = liveResponseDtoMapper,
             accessKey = accessKey
         )
     }
@@ -43,11 +45,15 @@ class InteractorsModule {
     fun provideGetSupportedCurrencies(
         currencyLayerService: CurrencyLayerService,
         listResponseDtoMapper: ListResponseDtoMapper,
+        entityMapper: ListResponseEntityMapper,
+        listResponseDao: ListResponseDao,
         @Named("accessKey") accessKey: String
     ): GetSupportedCurrencies {
         return GetSupportedCurrencies(
             service = currencyLayerService,
-            dtoMapper = listResponseDtoMapper,
+            listDtoMapper = listResponseDtoMapper,
+            entityMapper = entityMapper,
+            listResponseDao = listResponseDao,
             accessKey = accessKey
         )
     }

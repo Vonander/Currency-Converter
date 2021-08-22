@@ -1,6 +1,9 @@
 package com.vonander.currency_converter.interactors
 
 import com.google.gson.GsonBuilder
+import com.vonander.currency_converter.cache.*
+import com.vonander.currency_converter.cache.util.ListResponseEntityMapper
+import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
 import com.vonander.currency_converter.network.data.MockWebServerResponses.currencyConversionResponses
 import com.vonander.currency_converter.network.data.MockWebServerResponses.liveRatesRespondses
 import com.vonander.currency_converter.network.data.MockWebServerResponses.supportedCurrenciesResponses
@@ -29,12 +32,16 @@ class ExchangeViewTest {
     private lateinit var getSupportedCurrencies: GetSupportedCurrencies
     private lateinit var searchLiveRates: SearchLiveRates
     private lateinit var getCurrencyConversion: GetCurrencyConversion
-
     private lateinit var currencyLayerService: CurrencyLayerService
 
     private val exchangeListResponseDtoMapper = ListResponseDtoMapper()
     private val exchangeLiveResponseDtoMapper = LiveResponseDtoMapper()
     private val exchangeConvertResponseDtoMapper = ConvertResponseDtoMapper()
+    private val appDatabaseFake = AppDatabaseFake()
+    private val liveResponseEntityMapper = LiveResponseEntityMapper()
+    private val liveResponseDao = LiveResponseDaoFake(appDatabaseFake)
+    private val listResponseEntityMapper = ListResponseEntityMapper()
+    private val listResponseDao = ListResponseDaoFake(appDatabaseFake)
 
     private val mockAccessKey = "1234"
     private val mockSource = "USD"
@@ -53,13 +60,17 @@ class ExchangeViewTest {
 
         getSupportedCurrencies = GetSupportedCurrencies(
             service = currencyLayerService,
-            dtoMapper = exchangeListResponseDtoMapper,
+            listDtoMapper = exchangeListResponseDtoMapper,
+            entityMapper = listResponseEntityMapper,
+            listResponseDao = listResponseDao,
             accessKey = mockAccessKey
         )
 
         searchLiveRates = SearchLiveRates(
+            liveResponseDao = liveResponseDao,
+            listDtoMapper = exchangeLiveResponseDtoMapper,
             service = currencyLayerService,
-            dtoMapper = exchangeLiveResponseDtoMapper,
+            entityMapper = liveResponseEntityMapper,
             accessKey = mockAccessKey
         )
 
@@ -117,6 +128,10 @@ class ExchangeViewTest {
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .setBody(liveRatesRespondses)
         )
+
+        val defaultResponse = liveResponseDao.getAllLiveResponses()
+
+        assert(defaultResponse.success == "false")
 
         val flowItems = searchLiveRates.execute(
             source = mockSource

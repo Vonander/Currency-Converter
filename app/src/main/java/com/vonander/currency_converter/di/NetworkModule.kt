@@ -20,7 +20,7 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideExchangeLiveResponseDtoMapper() : LiveResponseDtoMapper {
+    fun provideLiveResponseDtoMapper() : LiveResponseDtoMapper {
         return LiveResponseDtoMapper()
     }
 

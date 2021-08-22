@@ -7,15 +7,19 @@ import com.vonander.currency_converter.network.model.ListResponseDto
 class ListResponseDtoMapper : DomainMapper<ListResponseDto, ListResponse> {
     override fun mapToDomainModel(model: ListResponseDto): ListResponse {
         return ListResponse(
+            id = model.id,
             success = model.success,
-            currencies = model.currencies
+            currencies = model.currencies,
+            error = model.error
         )
     }
 
     override fun mapFromDomainModel(domainModel: ListResponse): ListResponseDto {
         return ListResponseDto(
+            id = domainModel.id,
             success = domainModel.success,
-            currencies = domainModel.currencies
+            currencies = domainModel.currencies,
+            error = domainModel.error
         )
     }
 }

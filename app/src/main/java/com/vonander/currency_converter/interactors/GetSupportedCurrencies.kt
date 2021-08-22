@@ -1,5 +1,7 @@
 package com.vonander.currency_converter.interactors
 
+import com.vonander.currency_converter.cache.ListResponseDao
+import com.vonander.currency_converter.cache.util.ListResponseEntityMapper
 import com.vonander.currency_converter.domain.DataState
 import com.vonander.currency_converter.domain.model.ListResponse
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
@@ -9,7 +11,9 @@ import kotlinx.coroutines.flow.flow
 
 class GetSupportedCurrencies(
     private val service: CurrencyLayerService,
-    private val dtoMapper: ListResponseDtoMapper,
+    private val entityMapper: ListResponseEntityMapper,
+    private val listDtoMapper: ListResponseDtoMapper,
+    private val listResponseDao: ListResponseDao,
     private val accessKey: String
 ) {
 
@@ -18,17 +22,27 @@ class GetSupportedCurrencies(
 
             emit(DataState.loading())
 
-            val response = getSupportedCurrenciewFromNetwork()
+            val response = getSupportedCurrenciesFromNetwork()
 
-            emit(DataState.success(response))
+            listResponseDao.insertListResponse(entityMapper.mapFromDomainModel(response))
+
+            val cacheLiveResult = listResponseDao.getAllListResponses()
+
+            println("okej cacheLiveResult: $cacheLiveResult")
+
+            val listResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult) // här blir det konstigt
+
+            println("okej listResponsesFromCache: $listResponsesFromCache")
+
+            emit(DataState.success(listResponsesFromCache))
 
         } catch (e: Exception) {
             emit(DataState.error<ListResponse>(e.message ?: "Unknown get supported currencies Error"))
         }
     }
 
-    private suspend fun getSupportedCurrenciewFromNetwork(): ListResponse {
-        return dtoMapper.mapToDomainModel(
+    private suspend fun getSupportedCurrenciesFromNetwork(): ListResponse {
+        return listDtoMapper.mapToDomainModel(
             service.list(
                 access_key = accessKey
             )

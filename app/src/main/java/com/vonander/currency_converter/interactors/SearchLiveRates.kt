@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class SearchLiveRates(
-    private val liveResponseDao: LiveResponseDao,
     private val service: CurrencyLayerService,
     private val entityMapper: LiveResponseEntityMapper,
-    private val dtoMapper: LiveResponseDtoMapper,
+    private val liveDtoMapper: LiveResponseDtoMapper,
+    private val liveResponseDao: LiveResponseDao,
     private val accessKey: String
 ) {
     fun execute(
@@ -41,7 +41,7 @@ class SearchLiveRates(
         source: String
     ): LiveResponse {
 
-        return dtoMapper.mapToDomainModel(
+        return liveDtoMapper.mapToDomainModel(
             service.live(
                 access_key = accessKey,
                 source = source
