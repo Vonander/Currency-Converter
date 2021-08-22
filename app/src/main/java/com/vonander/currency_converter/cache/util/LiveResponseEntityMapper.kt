@@ -8,19 +8,21 @@ import kotlinx.parcelize.RawValue
 class LiveResponseEntityMapper: DomainMapper<LiveResponseEntity, LiveResponse> {
     override fun mapToDomainModel(model: LiveResponseEntity): LiveResponse {
         return LiveResponse(
+            id = model.id,
             success = convertStringToBoolean(model.success),
             source = model.source,
-            quotes = convertStringDoubleToHashMap(model.quotes!!),
-            error = convertStringAnyToHashMap(model.error!!)
+            quotes = convertStringToHashMap(quotes = model.quotes),
+            error = convertStringToHashMapAny(error = model.error)
         )
     }
 
     override fun mapFromDomainModel(domainModel: LiveResponse): LiveResponseEntity {
         return LiveResponseEntity(
+            id = domainModel.id,
             success = convertBooleanToString(domainModel.success),
             source = domainModel.source,
-            quotes = convertHashMapDoubleToString(domainModel.quotes),
-            error = convertHashMapAnyToString(domainModel.error)
+            quotes = convertHashMapToString(quotes = domainModel.quotes, error = null),
+            error = convertHashMapToString(quotes = null, error = domainModel.error)
         )
     }
 
@@ -32,36 +34,51 @@ class LiveResponseEntityMapper: DomainMapper<LiveResponseEntity, LiveResponse> {
         return if (boolean) "true" else "false"
     }
 
-    private fun convertStringAnyToHashMap(string: String): HashMap<String, @RawValue Any> {
-        val parts = string.split(",")
-        val hashMap = HashMap<String, @RawValue Any>()
-        hashMap[parts[0]] = parts[1]
+    private fun convertStringToHashMap(quotes: String?): HashMap<String, Double> {
+        val hashMap = quotes?.dropLast(1)?.split(",")?.associate {
+            val (left, right) = it.split("=")
+            left to right.toDouble()
+        }
+
+        return hashMap as HashMap<String, Double>
+    }
+
+    private fun convertStringToHashMapAny(error: String?): HashMap<String, @RawValue Any> {
+        var hashMap = HashMap<String, Any>()
+        val e = error ?: ""
+
+        if (e.isNotEmpty()) {
+
+            hashMap = error?.dropLast(1)?.split(",")?.associate {
+                val (left, right) = it.split("=")
+                left to right as Any
+            } as HashMap<String, @RawValue Any>
+
+        } else {
+
+            hashMap["error"] = e
+        }
 
         return hashMap
     }
 
-    private fun convertStringDoubleToHashMap(string: String): HashMap<String, Double> {
-        val parts = string.split(",")
-        val hashMap = HashMap<String, Double>()
-        hashMap[parts[0]] = parts[1].toDouble()
-
-        return hashMap
-    }
-
-    private fun convertHashMapAnyToString(hashMap: HashMap<String, @RawValue Any>? ): String {
+    private fun convertHashMapToString(
+        quotes: HashMap<String, Double>?,
+        error: HashMap<String, Any>?
+    ): String {
         val stringBuilder = StringBuilder()
-        stringBuilder.append(hashMap?.keys?.first())
-        stringBuilder.append(",")
-        stringBuilder.append(hashMap?.getValue(hashMap.keys.first()))
 
-        return stringBuilder.toString()
-    }
+        quotes?.let {
+            quotes.forEach { (key, value) ->
+                stringBuilder.append("$key=$value,")
+            }
+        }
 
-    private fun convertHashMapDoubleToString(hashMap: HashMap<String, Double>? ): String {
-        val stringBuilder = StringBuilder()
-        stringBuilder.append(hashMap?.keys?.first())
-        stringBuilder.append(",")
-        stringBuilder.append(hashMap?.getValue(hashMap.keys.first()))
+        error?.let {
+            error.forEach { (key, value) ->
+                stringBuilder.append("$key=$value,")
+            }
+        }
 
         return stringBuilder.toString()
     }

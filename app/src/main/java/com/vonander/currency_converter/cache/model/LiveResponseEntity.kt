@@ -7,7 +7,10 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "liveResponseEntity")
 data class LiveResponseEntity(
 
-    @PrimaryKey(autoGenerate = false)
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    var id: Int,
+
     @ColumnInfo(name = "success")
     var success: String,
 

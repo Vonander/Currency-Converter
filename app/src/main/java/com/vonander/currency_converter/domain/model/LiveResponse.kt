@@ -6,6 +6,7 @@ import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class LiveResponse(
+    var id: Int,
     var success: Boolean,
     var source: String?,
     var quotes: HashMap<String, Double>?,

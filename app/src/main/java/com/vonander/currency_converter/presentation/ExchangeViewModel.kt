@@ -25,7 +25,7 @@ class ExchangeViewModel @Inject constructor(
     private val getCurrencyConversion: GetCurrencyConversion
 ) : ViewModel() {
 
-    val loading = mutableStateOf(false)
+    private val loading = mutableStateOf(false)
     val exchangeFromCurrency = mutableStateOf("")
     val exchangeToCurrency = mutableStateOf("")
     val source = mutableStateOf("")

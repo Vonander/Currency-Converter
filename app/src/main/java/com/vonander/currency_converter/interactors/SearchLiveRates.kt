@@ -24,7 +24,13 @@ class SearchLiveRates(
 
             val response = getExchangeRateResponseFromNetwork(source)
 
-            emit(DataState.success(response))
+            liveResponseDao.insertLiveResponse(entityMapper.mapFromDomainModel(response))
+
+            val cacheLiveResult = liveResponseDao.getAllLiveResponses()
+
+            val liveResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult)
+
+            emit(DataState.success(liveResponsesFromCache))
 
         } catch (e: Exception) {
             emit(DataState.error<LiveResponse>(e.message ?: "Unknown search live rates Error"))

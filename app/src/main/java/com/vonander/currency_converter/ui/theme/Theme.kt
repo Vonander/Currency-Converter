@@ -15,7 +15,7 @@ private val DarkColorPalette = darkColors(
     secondary = Complementary,
     background = Grey_900,
     onPrimary = Color.White,
-    onBackground = Grey_700,
+    onBackground = Teal50_600,
 )
 
 @SuppressLint("ConflictingOnColor")
