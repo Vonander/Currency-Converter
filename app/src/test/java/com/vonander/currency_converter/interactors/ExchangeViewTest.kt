@@ -68,7 +68,7 @@ class ExchangeViewTest {
 
         searchLiveRates = SearchLiveRates(
             liveResponseDao = liveResponseDao,
-            listDtoMapper = exchangeLiveResponseDtoMapper,
+            liveDtoMapper = exchangeLiveResponseDtoMapper,
             service = currencyLayerService,
             entityMapper = liveResponseEntityMapper,
             accessKey = mockAccessKey
@@ -88,6 +88,10 @@ class ExchangeViewTest {
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .setBody(supportedCurrenciesResponses)
         )
+
+        val defaultResponse = listResponseDao.getAllListResponses()
+
+        assert(defaultResponse.success == "false")
 
         val flowItems = getSupportedCurrencies.execute().toList()
 

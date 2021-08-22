@@ -27,10 +27,10 @@ class MapperSharedLogic {
         val c = currencies ?: ""
 
         if (c.isNotEmpty()) {
-            hashMap = currencies?.dropLast(1)?.split(",")?.associate {
-                val (left, right) = currencies.split("=")
-                left to right.toString()
-            } as HashMap<String, String>
+            hashMap = currencies?.dropLast(1)?.split(",")
+                ?.map { it.split("=") }
+                ?.map { it.first() to it.last() }
+                ?.toMap() as HashMap<String, String>
 
         } else {
             hashMap["currencies"] = ""

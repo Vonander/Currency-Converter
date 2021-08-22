@@ -28,11 +28,7 @@ class GetSupportedCurrencies(
 
             val cacheLiveResult = listResponseDao.getAllListResponses()
 
-            println("okej cacheLiveResult: $cacheLiveResult")
-
-            val listResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult) // här blir det konstigt
-
-            println("okej listResponsesFromCache: $listResponsesFromCache")
+            val listResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult)
 
             emit(DataState.success(listResponsesFromCache))
 
