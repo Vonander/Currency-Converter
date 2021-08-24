@@ -5,12 +5,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vonander.currency_converter.BaseApplication
+import com.vonander.currency_converter.datastore.TimeElapsedDatastore
 import com.vonander.currency_converter.domain.model.ConvertResponse
 import com.vonander.currency_converter.domain.model.ListResponse
 import com.vonander.currency_converter.domain.model.LiveResponse
 import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
 import com.vonander.currency_converter.interactors.SearchLiveRates
+import com.vonander.currency_converter.util.LIST_KEY
+import com.vonander.currency_converter.util.LIVE_KEY
 import com.vonander.currency_converter.util.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -20,14 +24,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(
+    app: BaseApplication,
     private val getSupportedCurrencies: GetSupportedCurrencies,
     private val searchLiveRates: SearchLiveRates,
     private val getCurrencyConversion: GetCurrencyConversion
 ) : ViewModel() {
 
     private val loading = mutableStateOf(false)
-    val exchangeFromCurrency = mutableStateOf("")
-    val exchangeToCurrency = mutableStateOf("")
+    private val datastore = TimeElapsedDatastore(app)
+    val exchangeFromCurrencyLabel = mutableStateOf("")
+    val exchangeToCurrencyLabel = mutableStateOf("")
     val source = mutableStateOf("")
     val ratesList: MutableState<List<HashMap<String, Double>>> = mutableStateOf(listOf())
     val supportedCurrenciesMap = mutableStateOf(HashMap<String, String>())
@@ -41,7 +47,7 @@ class ExchangeViewModel @Inject constructor(
     val dropDownMenu2SelectedIndex = mutableStateOf(0)
 
     init {
-        getSupportedCurrencies()
+        getSupportedCurrenciesFromCache()
     }
 
     fun onTriggerEvent(event: ExchangeUseCaseEvent) {
@@ -68,6 +74,24 @@ class ExchangeViewModel @Inject constructor(
         }
     }
 
+    /**BandwidthLimitFeature*/
+    private fun getSupportedCurrenciesFromCache() {
+        datastore.hasTimeElapsed(
+            key = LIST_KEY,
+            minutes = 30
+        ) { timeElapsed ->
+
+            if (!timeElapsed) {
+                viewModelScope.launch {
+                    appendSupportedCurrencies(getSupportedCurrencies.getCachedCurrencies())
+                }
+            } else {
+
+                getSupportedCurrencies()
+            }
+        }
+    }
+
     private fun getSupportedCurrencies() {
         getSupportedCurrencies.execute().onEach { dataState ->
 
@@ -82,6 +106,45 @@ class ExchangeViewModel @Inject constructor(
             }
 
         }.launchIn(viewModelScope)
+    }
+
+    /**
+     * BandwidthLimitFeature
+     *
+     * Only used for the default currency USD
+     * */
+    private fun tryToGetRatesFromCache() {
+        if (!defaultCurrencyIsUSD()) {
+            newRatesSearch()
+
+            return
+        }
+
+        datastore.hasTimeElapsed(
+            key = LIVE_KEY,
+            minutes = 30
+        ) { timeElapsed ->
+
+            if (!timeElapsed) {
+
+                viewModelScope.launch {
+
+                    if (searchLiveRates.checkIfLiveResponseCacheListIsEmpty()) {
+                        newRatesSearch()
+
+                    } else {
+                        searchLiveRates.getLiveResponseFromCache { liveResponse ->
+                            appendRatesToList(liveResponse)
+                        }
+                    }
+                }
+
+            }else {
+
+                /** over 30 min has passed, it's ok to use API*/
+                newRatesSearch()
+            }
+        }
     }
 
     private fun newRatesSearch() {
@@ -103,40 +166,38 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun getCurrencyConversion() {
-        val amount: Double
-
-        if (exchangeFromCurrency.value.isBlank() || exchangeToCurrency.value.isBlank()) {
+        if (exchangeFromCurrencyLabel.value.isBlank() || exchangeToCurrencyLabel.value.isBlank()) {
             setErrorMessage(error = "Currencies are not set")
-
             return
         }
+
+        var amount: Double = 1.0
 
         try {
             amount = searchBarQueryText.value.toDouble()
 
-            getCurrencyConversion.execute(
-                from = exchangeFromCurrency.value,
-                to = exchangeToCurrency.value,
-                amount = amount
-            ).onEach { dataState ->
-
-                loading.value = dataState.loading
-
-                dataState.data?.let { response ->
-                    handleConversionResponse(response)
-                }
-
-                dataState.error?.let { error ->
-                    setErrorMessage(error = "getCurrencyConversion error: $error")
-                }
-
-            }.launchIn(viewModelScope)
-
         } catch (e: Exception) {
-            setErrorMessage(
-                error = "getCurrencyConversion error Exception: $e ${searchBarQueryText.value} is not supported"
-            )
+            setErrorMessage(error = "getCurrencyConversion error Exception: $e ${searchBarQueryText.value} is not supported")
+            return
         }
+
+        getCurrencyConversion.execute(
+            from = exchangeFromCurrencyLabel.value,
+            to = exchangeToCurrencyLabel.value,
+            amount = amount
+        ).onEach { dataState ->
+
+            loading.value = dataState.loading
+
+            dataState.data?.let { response ->
+                handleConversionResponse(response)
+            }
+
+            dataState.error?.let { error ->
+                setErrorMessage(error = "getCurrencyConversion error: $error")
+            }
+
+        }.launchIn(viewModelScope)
     }
 
     private fun appendSupportedCurrencies(response: ListResponse) {
@@ -189,7 +250,7 @@ class ExchangeViewModel @Inject constructor(
                 val currencyStringShort = currencyString.drop(4).dropLast(1)
                 val rateStringEdited = rateString.drop(1).dropLast(1)
 
-                if (currencyStringShort == exchangeToCurrency.value) {
+                if (currencyStringShort == exchangeToCurrencyLabel.value) {
                     rate = rateStringEdited
                 }
             }
@@ -211,16 +272,16 @@ class ExchangeViewModel @Inject constructor(
         val currency = supportedCurrenciesList.value[index]
 
         source.value = currency
-        exchangeFromCurrency.value = currency
+        exchangeFromCurrencyLabel.value = currency
 
-        newRatesSearch()
+        tryToGetRatesFromCache()
     }
 
     fun updateDropdownMenu2Label(index: Int) {
         dropDownMenu2SelectedIndex.value = index
         val currency = supportedCurrenciesList.value[index]
 
-        exchangeToCurrency.value = currency
+        exchangeToCurrencyLabel.value = currency
     }
 
     fun onQueryChanged(query: String) {
@@ -236,8 +297,12 @@ class ExchangeViewModel @Inject constructor(
         Log.e(TAG, error)
     }
 
+    private fun defaultCurrencyIsUSD(): Boolean {
+        return source.value == "USD"
+    }
+
     private fun defaultToUSD() {
-        exchangeFromCurrency.value = "USD"
+        exchangeFromCurrencyLabel.value = "USD"
         supportedCurrenciesList.value.forEachIndexed { index, currency ->
             if (currency == "USD") {
                 dropDownMenu1SelectedIndex.value = index
@@ -245,6 +310,7 @@ class ExchangeViewModel @Inject constructor(
         }
 
         source.value = "USD"
+
         newRatesSearch()
     }
 }

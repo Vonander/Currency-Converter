@@ -1,7 +1,9 @@
 package com.vonander.currency_converter.interactors
 
 import com.google.gson.GsonBuilder
-import com.vonander.currency_converter.cache.*
+import com.vonander.currency_converter.cache.AppDatabaseFake
+import com.vonander.currency_converter.cache.ListResponseDaoFake
+import com.vonander.currency_converter.cache.LiveResponseDaoFake
 import com.vonander.currency_converter.cache.util.ListResponseEntityMapper
 import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
 import com.vonander.currency_converter.network.data.MockWebServerResponses.currencyConversionResponses

@@ -22,19 +22,18 @@ class GetSupportedCurrencies(
 
             emit(DataState.loading())
 
-            val response = getSupportedCurrenciesFromNetwork()
+            insertToCache()
 
-            listResponseDao.insertListResponse(entityMapper.mapFromDomainModel(response))
-
-            val cacheLiveResult = listResponseDao.getAllListResponses()
-
-            val listResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult)
-
-            emit(DataState.success(listResponsesFromCache))
+            emit(DataState.success(getCachedCurrencies()))
 
         } catch (e: Exception) {
             emit(DataState.error<ListResponse>(e.message ?: "Unknown get supported currencies Error"))
         }
+    }
+
+    private suspend fun insertToCache() {
+        val response = getSupportedCurrenciesFromNetwork()
+        listResponseDao.insertListResponse(entityMapper.mapFromDomainModel(response))
     }
 
     private suspend fun getSupportedCurrenciesFromNetwork(): ListResponse {
@@ -43,5 +42,15 @@ class GetSupportedCurrencies(
                 access_key = accessKey
             )
         )
+    }
+
+    suspend fun getCachedCurrencies(): ListResponse {
+        val cacheLiveResult = listResponseDao.getAllListResponses()
+
+        if (cacheLiveResult == null) { insertToCache() }
+
+        val listResponsesFromCache = entityMapper.mapToDomainModel(listResponseDao.getAllListResponses())
+
+        return (listResponsesFromCache)
     }
 }

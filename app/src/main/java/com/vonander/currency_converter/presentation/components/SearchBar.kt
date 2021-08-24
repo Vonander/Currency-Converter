@@ -25,8 +25,8 @@ fun SearchBar(
 ) {
     val query = viewModel.searchBarQueryText.value
     val result = viewModel.searchBarResultText.value
-    val exchangeFromLabel = viewModel.exchangeFromCurrency.value
-    val exchangeToLabel = viewModel.exchangeToCurrency.value
+    val exchangeFromLabel = viewModel.exchangeFromCurrencyLabel.value
+    val exchangeToLabel = viewModel.exchangeToCurrencyLabel.value
 
     Surface(
         modifier = Modifier.fillMaxWidth(),

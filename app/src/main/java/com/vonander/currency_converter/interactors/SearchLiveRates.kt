@@ -1,6 +1,7 @@
 package com.vonander.currency_converter.interactors
 
 import com.vonander.currency_converter.cache.LiveResponseDao
+import com.vonander.currency_converter.cache.model.LiveResponseEntity
 import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
 import com.vonander.currency_converter.domain.DataState
 import com.vonander.currency_converter.domain.model.LiveResponse
@@ -22,13 +23,11 @@ class SearchLiveRates(
         try {
             emit(DataState.loading())
 
-            val response = getExchangeRateResponseFromNetwork(source)
-
-            liveResponseDao.insertLiveResponse(entityMapper.mapFromDomainModel(response))
+            insertToCache(source = source)
 
             val cacheLiveResult = liveResponseDao.getAllLiveResponses()
 
-            val liveResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult)
+            val liveResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult[getLastIndex(cacheLiveResult)])
 
             emit(DataState.success(liveResponsesFromCache))
 
@@ -47,5 +46,30 @@ class SearchLiveRates(
                 source = source
             )
         )
+    }
+
+    private fun getLastIndex(list: List<LiveResponseEntity>): Int {
+        return if (list.isEmpty()) {
+            0
+        } else {
+            list.lastIndex
+        }
+    }
+
+    private suspend fun insertToCache(source: String) {
+        val response = getExchangeRateResponseFromNetwork(source)
+        liveResponseDao.insertLiveResponse(entityMapper.mapFromDomainModel(response))
+    }
+
+    suspend fun checkIfLiveResponseCacheListIsEmpty(): Boolean {
+        return liveResponseDao.getAllLiveResponses().isEmpty()
+    }
+
+    suspend fun getLiveResponseFromCache(completion: (LiveResponse) -> Unit ) {
+        val cacheLiveResult = liveResponseDao.getAllLiveResponses()
+
+        val liveResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult[getLastIndex(cacheLiveResult)])
+
+        completion(liveResponsesFromCache)
     }
 }

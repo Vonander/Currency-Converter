@@ -8,7 +8,9 @@ import com.vonander.currency_converter.cache.dataBase.ListResponseDatabase
 import com.vonander.currency_converter.cache.dataBase.LiveResponseDatabase
 import com.vonander.currency_converter.cache.util.ListResponseEntityMapper
 import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
-import com.vonander.currency_converter.util.DATABASE_NAME
+import com.vonander.currency_converter.util.DATABASE_NAME_LIST
+import com.vonander.currency_converter.util.DATABASE_NAME_LIVE
+
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,9 +23,9 @@ object CacheModule {
 
     @Singleton
     @Provides
-    fun provideDb(app: BaseApplication): LiveResponseDatabase {
+    fun provideLiveDb(app: BaseApplication): LiveResponseDatabase {
         return Room
-            .databaseBuilder(app, LiveResponseDatabase::class.java, DATABASE_NAME)
+            .databaseBuilder(app, LiveResponseDatabase::class.java, DATABASE_NAME_LIVE)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -32,7 +34,7 @@ object CacheModule {
     @Provides
     fun provideListDb(app: BaseApplication): ListResponseDatabase {
         return Room
-            .databaseBuilder(app, ListResponseDatabase::class.java, DATABASE_NAME)
+            .databaseBuilder(app, ListResponseDatabase::class.java, DATABASE_NAME_LIST)
             .fallbackToDestructiveMigration()
             .build()
     }
