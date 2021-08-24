@@ -5,6 +5,7 @@ import com.vonander.currency_converter.domain.model.ConvertResponse
 import com.vonander.currency_converter.network.responses.CurrencyLayerService
 import com.vonander.currency_converter.network.util.ConvertResponseDtoMapper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class GetCurrencyConversion(
@@ -20,6 +21,8 @@ class GetCurrencyConversion(
     ): Flow<DataState<ConvertResponse>> = flow {
         try {
 
+            println("okej GetCurrencyConversion.execute: from: $from to: $to amount: $amount")
+
             emit(DataState.loading())
 
             val response = GetCurrencyConversionFromNetwork(from, to, amount)
@@ -29,6 +32,8 @@ class GetCurrencyConversion(
         } catch (e: Exception) {
             emit(DataState.error<ConvertResponse>(e.message ?: "Unknown currency convert error"))
         }
+    }.catch { error ->
+        println("okej error: $error")
     }
 
     private suspend fun GetCurrencyConversionFromNetwork(

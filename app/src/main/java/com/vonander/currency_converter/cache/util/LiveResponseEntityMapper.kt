@@ -26,4 +26,12 @@ class LiveResponseEntityMapper: DomainMapper<LiveResponseEntity, LiveResponse> {
             error = mapper.convertHashMapToString(quotes = null, error = domainModel.error)
         )
     }
+
+    fun fromEntityList(initial: List<LiveResponseEntity>): List<LiveResponse>{
+        return initial.map { mapToDomainModel(it) }
+    }
+
+    fun toEntityList(initial: List<LiveResponse>): List<LiveResponseEntity>{
+        return initial.map { mapFromDomainModel(it) }
+    }
 }

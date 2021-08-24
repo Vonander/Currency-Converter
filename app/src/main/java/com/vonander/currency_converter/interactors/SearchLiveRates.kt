@@ -19,21 +19,27 @@ class SearchLiveRates(
 ) {
     fun execute(
         source: String
-    ): Flow<DataState<LiveResponse>> = flow {
+    ): Flow<DataState<List<LiveResponse>>> = flow {
         try {
             emit(DataState.loading())
 
             insertToCache(source = source)
 
-            val cacheLiveResult = liveResponseDao.getAllLiveResponses()
-
-            val liveResponsesFromCache = entityMapper.mapToDomainModel(cacheLiveResult[getLastIndex(cacheLiveResult)])
+            val allLiveResponses = liveResponseDao.getAllLiveResponses()
+            val liveResponsesFromCache = entityMapper.fromEntityList(allLiveResponses)
 
             emit(DataState.success(liveResponsesFromCache))
 
         } catch (e: Exception) {
-            emit(DataState.error<LiveResponse>(e.message ?: "Unknown search live rates Error"))
+
+            val errorMessage = liveResponseDao.getAllLiveResponses()[0].error ?: "Unknown search live rates Error"
+            emit(DataState.error<List<LiveResponse>>(message = errorMessage))
         }
+    }
+
+    private suspend fun insertToCache(source: String) {
+        val response = getExchangeRateResponseFromNetwork(source)
+        liveResponseDao.insertLiveResponse(entityMapper.mapFromDomainModel(response))
     }
 
     private suspend fun getExchangeRateResponseFromNetwork(
@@ -54,11 +60,6 @@ class SearchLiveRates(
         } else {
             list.lastIndex
         }
-    }
-
-    private suspend fun insertToCache(source: String) {
-        val response = getExchangeRateResponseFromNetwork(source)
-        liveResponseDao.insertLiveResponse(entityMapper.mapFromDomainModel(response))
     }
 
     suspend fun checkIfLiveResponseCacheListIsEmpty(): Boolean {

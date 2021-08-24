@@ -6,6 +6,7 @@ import com.vonander.currency_converter.cache.ListResponseDaoFake
 import com.vonander.currency_converter.cache.LiveResponseDaoFake
 import com.vonander.currency_converter.cache.util.ListResponseEntityMapper
 import com.vonander.currency_converter.cache.util.LiveResponseEntityMapper
+import com.vonander.currency_converter.domain.model.LiveResponse
 import com.vonander.currency_converter.network.data.MockWebServerResponses.currencyConversionResponses
 import com.vonander.currency_converter.network.data.MockWebServerResponses.liveRatesRespondses
 import com.vonander.currency_converter.network.data.MockWebServerResponses.supportedCurrenciesResponses
@@ -128,28 +129,28 @@ class ExchangeViewTest {
     }
 
     @Test
-    fun searchLiveRates(): Unit = runBlocking {
+    fun searchLiveRates_emitRatesFromCache(): Unit = runBlocking {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .setBody(liveRatesRespondses)
         )
 
-        val defaultResponse = liveResponseDao.getAllLiveResponses()
-
-        assert(defaultResponse.success == "false")
+        assert(liveResponseDao.getAllLiveResponses().isEmpty())
 
         val flowItems = searchLiveRates.execute(
             source = mockSource
         ).toList()
 
+        assert(liveResponseDao.getAllLiveResponses().isNotEmpty())
+
         assert(flowItems[0].loading)
 
         val liveRates = flowItems[1].data
 
-        assert(liveRates?.success == true)
+        assert(liveRates?.size?: 0 > 0)
 
-        assert(liveRates?.quotes?.isNotEmpty() == true)
+        assert(liveRates?.get(index =0 ) is LiveResponse)
 
         assert(!flowItems[1].loading)
     }

@@ -40,8 +40,8 @@ class NetworkModule {
     @Provides
     @Named("accessKey")
     fun provideAccessKey() : String {
-        //return "e4dc9f5f2d04e92f220fc2beb045c241" // free account
-        return "8a6c606aa70b3d564527035656fd6d75" //paid account
+        return "e4dc9f5f2d04e92f220fc2beb045c241" // free account
+        //return "8a6c606aa70b3d564527035656fd6d75" //paid account
     }
 
     @Singleton

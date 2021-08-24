@@ -134,7 +134,7 @@ class ExchangeViewModel @Inject constructor(
 
                     } else {
                         searchLiveRates.getLiveResponseFromCache { liveResponse ->
-                            appendRatesToList(liveResponse)
+                            appendRatesToList(listOf(liveResponse))
                         }
                     }
                 }
@@ -160,31 +160,22 @@ class ExchangeViewModel @Inject constructor(
 
             dataState.error?.let { error ->
                 setErrorMessage(error = "newRatesSearch error Exception: $error")
+
+                defaultToUSD()
             }
 
         }.launchIn(viewModelScope)
     }
 
     private fun getCurrencyConversion() {
-        if (exchangeFromCurrencyLabel.value.isBlank() || exchangeToCurrencyLabel.value.isBlank()) {
-            setErrorMessage(error = "Currencies are not set")
-            return
-        }
-
-        var amount: Double = 1.0
-
-        try {
-            amount = searchBarQueryText.value.toDouble()
-
-        } catch (e: Exception) {
-            setErrorMessage(error = "getCurrencyConversion error Exception: $e ${searchBarQueryText.value} is not supported")
+        if (!passedCurrencyConversionErrorHandling()) {
             return
         }
 
         getCurrencyConversion.execute(
             from = exchangeFromCurrencyLabel.value,
             to = exchangeToCurrencyLabel.value,
-            amount = amount
+            amount = searchBarQueryText.value.toDouble()
         ).onEach { dataState ->
 
             loading.value = dataState.loading
@@ -200,12 +191,30 @@ class ExchangeViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun appendSupportedCurrencies(response: ListResponse) {
-        response.currencies.let {
-            supportedCurrenciesMap.value = response.currencies!!
+    private fun passedCurrencyConversionErrorHandling():Boolean {
+        var passed = true
+
+        if (exchangeFromCurrencyLabel.value.isBlank() || exchangeToCurrencyLabel.value.isBlank()) {
+            setErrorMessage(error = "Currencies are not set")
+            passed = false
         }
 
+        try {
+            searchBarQueryText.value.toDouble()
+
+        } catch (e: Exception) {
+            setErrorMessage(error = "getCurrencyConversion error Exception: $e ${searchBarQueryText.value} is not supported")
+            passed = false
+        }
+
+        return passed
+    }
+
+    private fun appendSupportedCurrencies(response: ListResponse) {
         response.currencies.let {
+
+            supportedCurrenciesMap.value = response.currencies!!
+
             val newEntries = mutableListOf<String>()
 
             it?.entries?.forEach {
@@ -218,7 +227,9 @@ class ExchangeViewModel @Inject constructor(
         }
     }
 
-    private fun appendRatesToList(response: LiveResponse) {
+    private fun appendRatesToList(response: List<LiveResponse>) {
+        val response = response[getLastIndex(response)]
+
         if (!response.success) {
             errorMessage.value = (response.error?.get("info") ?: "Unknown Api error").toString()
             defaultToUSD()
@@ -236,35 +247,53 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun handleConversionResponse(response: ConvertResponse) {
-        if (!response.success) {
-            Log.e(TAG, (response.error?.get("info")
-                ?: "Unknown Api error").toString() + "Calculating with stashed values")
-
-            var rate = ""
-
-            ratesList.value.onEach { hashMap ->
-
-                val currencyString: String = hashMap.keys.toString()
-                val rateString: String = hashMap.values.toString()
-
-                val currencyStringShort = currencyString.drop(4).dropLast(1)
-                val rateStringEdited = rateString.drop(1).dropLast(1)
-
-                if (currencyStringShort == exchangeToCurrencyLabel.value) {
-                    rate = rateStringEdited
-                }
-            }
-
-            val amount: Double = searchBarQueryText.value.toDouble()
-            val rateDouble: Double = rate.toDouble()
-            val currencyConverted = amount * rateDouble
-
-            searchBarResultText.value = "= $currencyConverted"
-
+        if (!passedConversionResponseErrorHandling(response)) {
+            calculateConversionWithSavedValues()
             return
         }
 
         searchBarResultText.value = "= ${response.result}"
+    }
+
+    private fun passedConversionResponseErrorHandling(response: ConvertResponse): Boolean {
+        var passed = true
+
+        if (!response.success) {
+            Log.e(TAG, (response.error?.get("info")
+                ?: "Unknown Api error").toString() + "/nCalculating with stashed values")
+
+            passed = false
+        }
+
+        return passed
+    }
+
+    private fun calculateConversionWithSavedValues() {
+
+        println("okej calculateConversionWithSavedValues ratesList.value: ${ratesList.value}")
+
+        var rate = ""
+
+        ratesList.value.onEach { hashMap ->
+
+            val currencyString: String = hashMap.keys.toString()
+            val rateString: String = hashMap.values.toString()
+
+            val currencyStringShort = currencyString.drop(4).dropLast(1)
+            val rateStringEdited = rateString.drop(1).dropLast(1)
+
+            if (currencyStringShort == exchangeToCurrencyLabel.value) {
+                rate = rateStringEdited
+            }
+        }
+
+        val amount: Double = searchBarQueryText.value.toDouble()
+        val rateDouble: Double = rate.toDouble()
+        val currencyConverted = amount * rateDouble
+
+
+        println("okej searchBarResultText.text: ${searchBarResultText.value}")
+        searchBarResultText.value = "= $currencyConverted"
     }
 
     fun updateCurrencyLazyColumnList(index: Int) {
@@ -301,6 +330,14 @@ class ExchangeViewModel @Inject constructor(
         return source.value == "USD"
     }
 
+    private fun getLastIndex(list: List<LiveResponse>): Int {
+        return if (list.isEmpty()) {
+            0
+        } else {
+            list.lastIndex
+        }
+    }
+
     private fun defaultToUSD() {
         exchangeFromCurrencyLabel.value = "USD"
         supportedCurrenciesList.value.forEachIndexed { index, currency ->
@@ -310,7 +347,5 @@ class ExchangeViewModel @Inject constructor(
         }
 
         source.value = "USD"
-
-        newRatesSearch()
     }
 }

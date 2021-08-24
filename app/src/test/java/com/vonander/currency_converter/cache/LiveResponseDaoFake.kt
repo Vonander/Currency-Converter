@@ -7,7 +7,7 @@ class LiveResponseDaoFake(
 ): LiveResponseDao {
 
     override suspend fun insertLiveResponse(response: LiveResponseEntity): Long {
-        appDatabaseFake.liveResponseEntity = response
+        appDatabaseFake.liveResponseEntityList.add(response)
 
         return 1
     }
@@ -16,7 +16,7 @@ class LiveResponseDaoFake(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllLiveResponses(): LiveResponseEntity {
-        return appDatabaseFake.liveResponseEntity
+    override suspend fun getAllLiveResponses(): List<LiveResponseEntity> {
+        return appDatabaseFake.liveResponseEntityList
     }
 }
