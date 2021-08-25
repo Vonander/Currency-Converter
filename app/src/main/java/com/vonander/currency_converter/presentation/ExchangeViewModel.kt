@@ -17,6 +17,7 @@ import com.vonander.currency_converter.util.LIST_KEY
 import com.vonander.currency_converter.util.LIVE_KEY
 import com.vonander.currency_converter.util.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(
-    private val app: BaseApplication,
+    app: BaseApplication,
     private val getSupportedCurrencies: GetSupportedCurrencies,
     private val searchLiveRates: SearchLiveRates,
     private val getCurrencyConversion: GetCurrencyConversion
@@ -115,6 +116,7 @@ class ExchangeViewModel @Inject constructor(
      * */
     private fun tryToGetRatesFromCache() {
         if (!defaultCurrencyIsUSD()) {
+
             newRatesSearch()
 
             return
@@ -129,7 +131,7 @@ class ExchangeViewModel @Inject constructor(
 
                 viewModelScope.launch {
 
-                    if (searchLiveRates.checkIfLiveResponseCacheListIsEmpty()) {
+                    if (searchLiveRates.checkIfLiveResponseCacheListIsEmptyOrUnsuccessful()) {
                         newRatesSearch()
 
                     } else {
@@ -159,9 +161,14 @@ class ExchangeViewModel @Inject constructor(
             }
 
             dataState.error?.let { error ->
-                setErrorMessage(error = "newRatesSearch error Exception: $error")
+                setErrorMessage(error = error)
 
-                defaultToUSD()
+                viewModelScope.launch {
+                    delay(200)
+                    setErrorMessage(error = "API only supports USD")
+
+                    source.value = "USD"
+                }
             }
 
         }.launchIn(viewModelScope)
@@ -232,7 +239,6 @@ class ExchangeViewModel @Inject constructor(
 
         if (!response.success) {
             errorMessage.value = (response.error?.get("info") ?: "Unknown Api error").toString()
-            defaultToUSD()
         }
 
         val newList = mutableListOf<HashMap<String, Double>>()
@@ -331,63 +337,5 @@ class ExchangeViewModel @Inject constructor(
         } else {
             list.lastIndex
         }
-    }
-
-    private fun defaultToUSD() {
-        exchangeFromCurrencyLabel.value = "USD"
-        supportedCurrenciesList.value.forEachIndexed { index, currency ->
-            if (currency == "USD") {
-                dropDownMenu1SelectedIndex.value = index
-            }
-        }
-
-        source.value = "USD"
-
-        //tryToGetRatesFromCache()
-
-
-//
-//        datastore.hasTimeElapsed(
-//            key = LIVE_KEY,
-//            minutes = 30
-//        ) { timeElapsed ->
-//
-//            if (!timeElapsed) {
-//
-//                viewModelScope.launch {
-//
-//                    if (searchLiveRates.checkIfLiveResponseCacheListIsEmpty()) {
-//                        newRatesSearch()
-//
-//                    } else {
-//                        searchLiveRates.getLiveResponseFromCache { liveResponse ->
-//                            appendRatesToList(listOf(liveResponse))
-//                        }
-//                    }
-//                }
-//
-//            }else {
-//
-//                /** over 30 min has passed, it's ok to use API*/
-//                newRatesSearch()
-//            }
-//        }
-
-
-
-
-
-
-
-
-
-
-
-//        viewModelScope.launch {
-//            delay(2000)
-//            newRatesSearch()
-//        }
-
-
     }
 }

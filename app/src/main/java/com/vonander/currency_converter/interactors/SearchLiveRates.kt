@@ -26,13 +26,15 @@ class SearchLiveRates(
             insertToCache(source = source)
 
             val allLiveResponses = liveResponseDao.getAllLiveResponses()
+
             val liveResponsesFromCache = entityMapper.fromEntityList(allLiveResponses)
 
             emit(DataState.success(liveResponsesFromCache))
 
         } catch (e: Exception) {
+            val errorMessage = handleErrorMessage(liveResponseDao.getAllLiveResponses()[0].error)
+            liveResponseDao.deleteAllLiveResponses()
 
-            val errorMessage = liveResponseDao.getAllLiveResponses()[0].error ?: "Unknown search live rates Error"
             emit(DataState.error<List<LiveResponse>>(message = errorMessage))
         }
     }
@@ -62,8 +64,22 @@ class SearchLiveRates(
         }
     }
 
-    suspend fun checkIfLiveResponseCacheListIsEmpty(): Boolean {
-        return liveResponseDao.getAllLiveResponses().isEmpty()
+    private fun handleErrorMessage(error: String?): String {
+        var errorMessage = "Unknown search live rates Error"
+
+        error?.let {
+
+            if (error.take(8) == "code=105") {
+                errorMessage = "Your current Subscription Plan does not support Source Currency Switching."
+            }
+        }
+
+        return errorMessage
+    }
+
+    suspend fun checkIfLiveResponseCacheListIsEmptyOrUnsuccessful(): Boolean {
+        return liveResponseDao.getAllLiveResponses().isEmpty() ||
+                liveResponseDao.getAllLiveResponses()[0].success == "false"
     }
 
     suspend fun getLiveResponseFromCache(completion: (LiveResponse) -> Unit ) {
