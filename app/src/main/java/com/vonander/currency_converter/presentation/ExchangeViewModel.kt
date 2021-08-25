@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExchangeViewModel @Inject constructor(
-    app: BaseApplication,
+    private val app: BaseApplication,
     private val getSupportedCurrencies: GetSupportedCurrencies,
     private val searchLiveRates: SearchLiveRates,
     private val getCurrencyConversion: GetCurrencyConversion
@@ -269,9 +269,6 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun calculateConversionWithSavedValues() {
-
-        println("okej calculateConversionWithSavedValues ratesList.value: ${ratesList.value}")
-
         var rate = ""
 
         ratesList.value.onEach { hashMap ->
@@ -291,8 +288,6 @@ class ExchangeViewModel @Inject constructor(
         val rateDouble: Double = rate.toDouble()
         val currencyConverted = amount * rateDouble
 
-
-        println("okej searchBarResultText.text: ${searchBarResultText.value}")
         searchBarResultText.value = "= $currencyConverted"
     }
 
@@ -347,5 +342,52 @@ class ExchangeViewModel @Inject constructor(
         }
 
         source.value = "USD"
+
+        //tryToGetRatesFromCache()
+
+
+//
+//        datastore.hasTimeElapsed(
+//            key = LIVE_KEY,
+//            minutes = 30
+//        ) { timeElapsed ->
+//
+//            if (!timeElapsed) {
+//
+//                viewModelScope.launch {
+//
+//                    if (searchLiveRates.checkIfLiveResponseCacheListIsEmpty()) {
+//                        newRatesSearch()
+//
+//                    } else {
+//                        searchLiveRates.getLiveResponseFromCache { liveResponse ->
+//                            appendRatesToList(listOf(liveResponse))
+//                        }
+//                    }
+//                }
+//
+//            }else {
+//
+//                /** over 30 min has passed, it's ok to use API*/
+//                newRatesSearch()
+//            }
+//        }
+
+
+
+
+
+
+
+
+
+
+
+//        viewModelScope.launch {
+//            delay(2000)
+//            newRatesSearch()
+//        }
+
+
     }
 }

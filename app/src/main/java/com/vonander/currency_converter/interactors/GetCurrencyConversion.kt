@@ -21,8 +21,6 @@ class GetCurrencyConversion(
     ): Flow<DataState<ConvertResponse>> = flow {
         try {
 
-            println("okej GetCurrencyConversion.execute: from: $from to: $to amount: $amount")
-
             emit(DataState.loading())
 
             val response = GetCurrencyConversionFromNetwork(from, to, amount)
@@ -33,7 +31,7 @@ class GetCurrencyConversion(
             emit(DataState.error<ConvertResponse>(e.message ?: "Unknown currency convert error"))
         }
     }.catch { error ->
-        println("okej error: $error")
+        emit(DataState.error<ConvertResponse>(error.localizedMessage ?: "Unknown currency convert error"))
     }
 
     private suspend fun GetCurrencyConversionFromNetwork(

@@ -73,15 +73,12 @@ class TimeElapsedDatastore (
 
                 if (differenceInMin > minutes) {
 
-                    println("okej differenceInMin: $differenceInMin")
-
                     saveCurrentTimeToDataStore(key)
 
                     timeElapsed(true)
 
                 } else {
 
-                    println("okej differenceInMin: $differenceInMin")
                     timeElapsed(false)
                 }
             }
