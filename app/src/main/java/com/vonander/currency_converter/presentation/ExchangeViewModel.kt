@@ -235,15 +235,15 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun appendRatesToList(response: List<LiveResponse>) {
-        val response = response[getLastIndex(response)]
+        val liveResponse = response[getLastIndex(response)]
 
-        if (!response.success) {
-            errorMessage.value = (response.error?.get("info") ?: "Unknown Api error").toString()
+        if (!liveResponse.success) {
+            errorMessage.value = (liveResponse.error?.get("info") ?: "Unknown Api error").toString()
         }
 
         val newList = mutableListOf<HashMap<String, Double>>()
 
-        response.quotes?.forEach {
+        liveResponse.quotes?.forEach {
             val newEntry = HashMap<String, Double>()
             newEntry[it.key] = it.value
             newList.add(newEntry)
