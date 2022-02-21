@@ -3,6 +3,7 @@ package com.vonander.currency_converter.presentation.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,63 +44,57 @@ fun ExchangeView(
 
             snackbarHost = { scaffoldState.snackbarHostState }
         ) {
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val dropDownMenus = createRef()
-                val supportedCurrenciesLazyColumn = createRef()
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(dropDownMenus) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Column(modifier = Modifier
+                    .padding(top = 10.dp)
+                    .fillMaxWidth(0.5f)) {
+
+                    DropDownMenu(
+                        expanded = viewModel.dropDownMenu1Expanded.value,
+                        selectedIndex = viewModel.dropDownMenu1SelectedIndex.value,
+                        items = viewModel.supportedCurrenciesList.value,
+                        onSelect = {
+                            viewModel.dropDownMenu1Expanded.value = false
+                            viewModel.updateCurrencyLazyColumnList(index = it)
+                        },
+                        onDismissRequest = {
+                            viewModel.dropDownMenu1Expanded.value = false
+                        },
+                        onButtonClick = {
+                            viewModel.dropDownMenu1Expanded.value = true
                         }
+                    )
+                }
+
+                Column(modifier = Modifier
+                    .padding(top = 10.dp)
+                    .fillMaxWidth()
                 ) {
 
-                    Column(modifier = Modifier
-                        .padding(top = 10.dp)
-                        .fillMaxWidth(0.5f)) {
-
-                        DropDownMenu(
-                            expanded = viewModel.dropDownMenu1Expanded.value,
-                            selectedIndex = viewModel.dropDownMenu1SelectedIndex.value,
-                            items = viewModel.supportedCurrenciesList.value,
-                            onSelect = {
-                                viewModel.dropDownMenu1Expanded.value = false
-                                viewModel.updateCurrencyLazyColumnList(index = it)
-                            },
-                            onDismissRequest = {
-                                viewModel.dropDownMenu1Expanded.value = false
-                            },
-                            onButtonClick = {
-                                viewModel.dropDownMenu1Expanded.value = true
-                            }
-                        )
-                    }
-
-                    Column(modifier = Modifier
-                        .padding(top = 10.dp)
-                        .fillMaxWidth()
-                    ) {
-
-                        DropDownMenu(
-                            expanded = viewModel.dropDownMenu2Expanded.value,
-                            selectedIndex = viewModel.dropDownMenu2SelectedIndex.value,
-                            items = viewModel.supportedCurrenciesList.value,
-                            onSelect = {
-                                viewModel.dropDownMenu2Expanded.value = false
-                                viewModel.updateDropdownMenu2Label(index = it)
-                            },
-                            onDismissRequest = {
-                                viewModel.dropDownMenu2Expanded.value = false
-                            },
-                            onButtonClick = {
-                                viewModel.dropDownMenu2Expanded.value = true
-                            }
-                        )
-                    }
+                    DropDownMenu(
+                        expanded = viewModel.dropDownMenu2Expanded.value,
+                        selectedIndex = viewModel.dropDownMenu2SelectedIndex.value,
+                        items = viewModel.supportedCurrenciesList.value,
+                        onSelect = {
+                            viewModel.dropDownMenu2Expanded.value = false
+                            viewModel.updateDropdownMenu2Label(index = it)
+                        },
+                        onDismissRequest = {
+                            viewModel.dropDownMenu2Expanded.value = false
+                        },
+                        onButtonClick = {
+                            viewModel.dropDownMenu2Expanded.value = true
+                        }
+                    )
                 }
+            }
+
+            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+                val supportedCurrenciesLazyColumn = createRef()
 
                 Box(
                     modifier = Modifier
@@ -108,28 +103,28 @@ fun ExchangeView(
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                         }
-                        .padding(bottom = 50.dp)
+                        .padding(bottom = 40.dp)
                 ) {
 
                     CustomLazyColumn(viewModel = viewModel)
 
-                    if (viewModel.errorMessage.value.isNotBlank()) {
+                    viewModel.errorMessage.value.getContentIfNotHandled()?.let { message ->
 
                         showSnackbar(
                             viewModel = viewModel,
-                            scaffoldState = scaffoldState
-                        )
-
-                        DefaultSnackbar(
-                            snackbarHostState = scaffoldState.snackbarHostState,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 10.dp),
-                            onDismiss = {
-                                scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
-                            }
+                            scaffoldState = scaffoldState,
+                            errorMessage = message
                         )
                     }
+
+                    DefaultSnackbar(
+                        snackbarHostState = scaffoldState.snackbarHostState,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter),
+                        onDismiss = {
+                            scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                        }
+                    )
                 }
             }
         }
@@ -138,13 +133,15 @@ fun ExchangeView(
 
 private fun showSnackbar(
     viewModel: ExchangeViewModel,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
+    errorMessage: String
 ) {
 
     viewModel.viewModelScope.launch {
         scaffoldState.snackbarHostState.showSnackbar(
-            message = viewModel.errorMessage.value,
-            actionLabel = "Hide"
+            message = errorMessage,
+            actionLabel = "Hide",
+            duration = SnackbarDuration.Short
         )
     }
 }

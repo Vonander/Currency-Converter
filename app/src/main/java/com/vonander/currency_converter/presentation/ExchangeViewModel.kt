@@ -13,6 +13,7 @@ import com.vonander.currency_converter.domain.model.LiveResponse
 import com.vonander.currency_converter.interactors.GetCurrencyConversion
 import com.vonander.currency_converter.interactors.GetSupportedCurrencies
 import com.vonander.currency_converter.interactors.SearchLiveRates
+import com.vonander.currency_converter.util.Event
 import com.vonander.currency_converter.util.LIST_KEY
 import com.vonander.currency_converter.util.LIVE_KEY
 import com.vonander.currency_converter.util.TAG
@@ -41,7 +42,7 @@ class ExchangeViewModel @Inject constructor(
     val supportedCurrenciesList: MutableState<List<String>> = mutableStateOf(listOf(""))
     val searchBarQueryText = mutableStateOf("1")
     val searchBarResultText = mutableStateOf("=")
-    val errorMessage = mutableStateOf("")
+    val errorMessage = mutableStateOf(Event<String>(null))
     val dropDownMenu1Expanded = mutableStateOf(false)
     val dropDownMenu1SelectedIndex = mutableStateOf(0)
     val dropDownMenu2Expanded = mutableStateOf(false)
@@ -238,7 +239,7 @@ class ExchangeViewModel @Inject constructor(
         val liveResponse = response[getLastIndex(response)]
 
         if (!liveResponse.success) {
-            errorMessage.value = (liveResponse.error?.get("info") ?: "Unknown Api error").toString()
+            setErrorMessage((liveResponse.error?.get("info") ?: "Unknown Api error").toString())
         }
 
         val newList = mutableListOf<HashMap<String, Double>>()
@@ -323,7 +324,7 @@ class ExchangeViewModel @Inject constructor(
     }
 
     private fun setErrorMessage(error: String) {
-        errorMessage.value = error
+        errorMessage.value = Event(error)
         Log.e(TAG, error)
     }
 
